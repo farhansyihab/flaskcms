@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ seo.title if seo else "ABI Sumsel" }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{{ seo.description if seo else '' }}">
-  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+
+    <title>
+        DPW ABI Sumatera Selatan - Beranda
+    </title>
+
+    <!-- Load static files -->
+    
+
+    <!-- Favicon Links (dari GitHub Pages) -->
+    <!-- Standard favicon -->
+    <link rel="icon" type="image/x-icon" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon.ico">
     <!-- PNG favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon-16x16.png">
@@ -28,44 +37,263 @@
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#da532c"> <!-- Ganti dengan warna tema Anda -->
     <meta name="msapplication-TileImage" content="https://farhansyihab.github.io/abi-firebase/public/img/icons/mstile-150x150.png">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://farhansyihab.github.io/abi-firebase/public/main.css">
+    <link rel="manifest" href="https://farhansyihab.github.io/abi-firebase/public/site.webmanifest"> <!-- Jika Anda memiliki webmanifest -->
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600;1,700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://farhansyihab.github.io/abi-firebase/public/main.css">
+    <link rel="stylesheet" href="https://farhansyihab.github.io/abi-firebase/public/custom-toast.css">
+
+    <!-- Block untuk meta tags -->
+    
+
+    
+    <style>
+        #frmKontak {
+            padding-left: 20px;
+            background: #fff;
+            box-shadow: 0 2px 25px rgba(0,0,0,.1);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+        }
+    </style>
+    
 </head>
 <body>
-
-<!-- HEADER -->
-<div id="header-placeholder"></div>
-
-<main class="container py-5">
-  {% if page %}
-    <h1>{{ page.title }}</h1>
+    <!-- Preloader -->
+    <div id="preloader"></div>
     
-    {% if page.content_html %}
-      <div class="page-content">
-        {{ page.content_html|safe }}
+    <!-- Top Bar -->
+<section id="topbar" class="topbar d-flex align-items-center">
+    <div class="container d-flex justify-content-center justify-content-md-between">
+        <div class="contact-info d-flex align-items-center">
+            <i class="bi bi-envelope d-flex align-items-center">
+                <a href="/cdn-cgi/l/email-protection#2944504748444c405a4d485b4448694e44484045074a4644">Darma</a>
+            </i>
+            <i class="bi bi-phone d-flex align-items-center ms-4">
+                <span>+62 852 6893 9238</span>
+            </i>
+        </div>
+        <div class="social-links d-none d-md-flex align-items-center">
+            <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="whatsapp"><i class="bi bi-whatsapp"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- Main Header -->
+<header id="header" class="header">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #008375;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">ABI SUMSEL</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo02" style="z-index: 100;">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Beranda</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about/">Tentang ABI</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team/">Struktur Organisasi</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/info/">Info</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact/">Kontak Kami</a>
+                        </li>
+                    </ul>
+                <form class="d-flex" action="/search/" method="get">
+                    <input name="query" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>    
+</header>
+    
+    <main id="main">
+        
+<!-- ======= Hero Section ======= -->
+<section id="hero" class="hero" style="padding-top: 15px !important; margin: auto; max-width: max-content;">
+    <div class="container position-relative" style="background-color: white !important;">
+        <div class="row gy-5">
+            
+        <!-- ======= Google Calendar (Daftar Acara) ======= -->
+            <div class="col-12 col-lg-3 order-3 order-lg-3">
+                <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card shadow-sm border-1 rounded-3">
+                      <div class="card-header text-white text-center py-2" style="background-color: #008375;">
+                          <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Kalender Kegiatan</h6>
+                      </div>
+                      <a href="jadwal-acara/" class="text-decoration-none text-dark">
+                        <div class="card-body">
+                            <div id="events-list">
+                            <p class="text-center"><i class="bi bi-hourglass"></i> Memuat agenda...</p>
+                            </div>
+                        </div>                        
+                      </a>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Rest of your hero content -->
+            <div class="col-12 col-lg-3 order-2 order-lg-1 align-items-center" style="max-width: fit-content; margin: auto;">
+                <div class="row" style="font-size: 30px; padding-top: 40px;"><strong>DPW <span>ABI SUMSEL</span></strong></div>
+                <div class="row"><p>Sinergi khidmad untuk bangsa yang bermartabat</p></div>
+            </div>
+
+            <div class="col-12 col-lg-6 order-1 order-lg-2 d-flex justify-content-center">
+                
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczNsLgGeCiC08i7LP4e5pQAfrMf4ugNWdCP3GqtinhzW_gV0r-QwFgkULGAISDVuOl19A0lIn5eqpX3QO8c3TKBo_4dGoivic78OgFUI9HOQXTjJapx6Cx8noUStCQywAS3IedCxdF7iAG9m4w8AaGW_=w1304-h594-s-no?authuser=0" class="img-fluid" alt="ABI SUMSEL" style="height: fit-content !important;">
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Icon boxes section... -->
+    <div class="icon-boxes position-relative">
+      <div class="container position-relative">
+        <div class="row gy-4 mt-5">
+
+          <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="icon-box">
+              <div class="icon"><i class="bi bi-easel"></i></div>
+              <h4 class="title"><a href="/about" class="stretched-link">Tentang ABI</a></h4>
+            </div>
+          </div><!--End Icon Box -->
+
+          <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="icon-box">
+              <div class="icon"><i class="bi bi-microsoft-teams"></i></div>
+              <h4 class="title"><a href="/team" class="stretched-link">Struktur Organisasi</a></h4>
+            </div>
+          </div><!--End Icon Box -->
+
+          <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="icon-box">
+              <div class="icon"><i class="bi bi-info-lg"></i></div>
+              <h4 class="title"><a href="/info" class="stretched-link">Info ABI SUMSEL</a></h4>
+            </div>
+          </div><!--End Icon Box -->
+
+          <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="500">
+            <div class="icon-box">
+              <div class="icon"><i class="bi bi-whatsapp"></i></div>
+              <h4 class="title"><a href="/contact" class="stretched-link">Hubungi Kami</a></h4>
+            </div>
+          </div><!--End Icon Box -->
+
+        </div>
       </div>
-    {% else %}
-      <p>Konten halaman akan segera hadir.</p>
-    {% endif %}
-  {% else %}
-    <h1>ABI Sumatera Selatan</h1>
-    <p>Website resmi DPW ABI Sumatera Selatan.</p>
-  {% endif %}
-</main>
+    </div>  
+    <!--End Icon Box section -->   
+</section>
 
-<!-- FOOTER -->
-<div id="footer-placeholder"></div>
+    </main>
+    
+    <footer id="footer" class="footer">
+    <div class="container mt-4">
+        <div class="copyright">
+            &copy; Copyright <strong><span>HUMAS ABI SUMSEL</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+            Created by <a href="https://agiptek.com/">Agiptek</a>
+        </div>
+    </div>
+</footer>
+    
+    <!-- Bootstrap 5 JS -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="https://farhansyihab.github.io/abi-firebase/public/main.js"></script>
+    
+    
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-fetch("/includes/header.html")
-  .then(r => r.text())
-  .then(t => document.getElementById("header-placeholder").innerHTML = t);
+  // ⚠️ GANTI DENGAN NILAI ANDA
+  const API_KEY = 'AIzaSyATHg3LO4Im6DnQIvorYCVW0cmvhIZpfmA'; // ← GANTI DENGAN API KEY ANDA
+  const CALENDAR_ID = 'd2684a340253715322e8696d20297847b0bc0a21155b50bcc9a89e63a371dae1@group.calendar.google.com';
 
-fetch("/includes/footer.html")
-  .then(r => r.text())
-  .then(t => document.getElementById("footer-placeholder").innerHTML = t);
+  // Ambil acara 30 hari ke depan (opsional: sesuaikan)
+  const now = new Date();
+  const timeMin = now.toISOString();
+  const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  fetch(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&orderBy=startTime&singleEvents=true&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&maxResults=10`)
+    .then(res => {
+      if (!res.ok) throw new Error('Gagal mengambil data');
+      return res.json();
+    })
+    .then(data => {
+      const container = document.getElementById('events-list');
+      if (!data.items || data.items.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted">Tidak ada agenda dalam 30 hari ke depan.</p>';
+        return;
+      }
+      const eventsToShow = data.items.slice(0, 2);
+      container.innerHTML = eventsToShow.map(event => {
+        const start = new Date(event.start.dateTime || event.start.date);
+        const end = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+
+        // Format tanggal
+        const formattedDate = start.toLocaleDateString('id-ID', {
+          weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+
+        // Format waktu
+        let timeStr = '';
+        if (event.start.dateTime) {
+          const startTime = start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+          const endTime = end ? end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
+          timeStr = ` · ${startTime}–${endTime}`;
+        } else {
+          timeStr = ' · Sepanjang hari';
+        }
+
+        return `
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6 class="card-title mb-1">${event.summary || 'Acara Tanpa Judul'}</h6>
+              <p class="text-muted small mb-1">
+                <i class="bi bi-calendar2-event me-1"></i> ${formattedDate}
+              </p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    })
+    .catch(err => {
+      console.error('Error fetching calendar events:', err);
+      document.getElementById('events-list').innerHTML = '<p class="text-center text-danger">Gagal memuat agenda.</p>';
+    });
 </script>
 
+
+    
+    <!-- Back to Top Button -->
+    <a href="#" class="scroll-top d-flex align-items-center justify-content-center">
+        <i class="bi bi-arrow-up-short"></i>
+    </a>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"2caf90a2be58466d8b1bf7bb767fa048","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
