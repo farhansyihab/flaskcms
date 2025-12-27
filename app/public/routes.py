@@ -1,61 +1,44 @@
 from flask import Blueprint, render_template, abort
+from flask import send_from_directory, current_app
+import os
+
 from app.services.firestore import (
     get_published_articles,
     get_article_by_slug,
+    get_home_page,
     get_page_by_slug,
-    get_home_page  # Kita akan buat fungsi ini
+    get_all_published_pages
 )
 
 public_bp = Blueprint("public", __name__)
 
-
 @public_bp.route("/")
 def home():
-    """Halaman beranda - cek apakah ada page dengan slug 'home' atau 'beranda'"""
-    # Coba cari halaman beranda
-    home_page = None
+    """Halaman beranda - khusus handle slug '/'"""
+    home_page = get_home_page()
     
-    # Coba slug 'home' dulu
-    home_page = get_page_by_slug("home")
-    
-    # Jika tidak ada, coba 'beranda'
-    if not home_page:
-        home_page = get_page_by_slug("beranda")
-    
-    # Jika ada halaman beranda, tampilkan
     if home_page:
         return render_template(
-            "public/page.html",  # Template untuk halaman biasa
+            "public/home.html",  # ← Harus ada di app/templates/public/
             page=home_page,
-            seo={
-                "title": home_page.get("seo", {}).get("meta_title", home_page["title"]),
-                "description": home_page.get("seo", {}).get("meta_description", ""),
-            },
-            is_home=True  # Flag khusus untuk template
+            seo=home_page.get("seo", {}),
+            is_home=True
         )
     
-    # Jika tidak ada halaman beranda, tampilkan default
-    try:
-        articles = [doc.to_dict() for doc in get_published_articles()]
-    except:
-        articles = []
-    
+    # Fallback jika tidak ada homepage
     return render_template(
-        "public/index.html",  # Template default
-        articles=articles,
+        "public/index.html",  # ← Juga di app/templates/public/
         seo={
             "title": "ABI Sumatera Selatan",
             "description": "Website resmi ABI Sumatera Selatan",
-        },
-        is_home=True
+        }
     )
 
-
-@public_bp.route("/<slug>")
+@public_bp.route("/<path:slug>")
 def page_detail(slug):
     """Halaman statis biasa"""
-    # Skip slug tertentu yang sudah ditangani
-    if slug in ['home', 'beranda']:
+    # Skip slug tertentu
+    if slug in ['', '/']:
         return home()
     
     page = get_page_by_slug(slug)
@@ -63,15 +46,11 @@ def page_detail(slug):
         abort(404)
     
     return render_template(
-        "public/page.html",
+        "public/page.html",  # ← Buat file ini nanti
         page=page,
-        seo={
-            "title": page.get("seo", {}).get("meta_title", page["title"]),
-            "description": page.get("seo", {}).get("meta_description", ""),
-        },
+        seo=page.get("seo", {}),
         is_home=False
     )
-
 
 @public_bp.route("/info/<slug>")
 def article_detail(slug):
@@ -81,11 +60,18 @@ def article_detail(slug):
         abort(404)
 
     return render_template(
-        "public/info/article.html",
+        "public/info/article.html",  # ← Akan dibuat nanti
         article=article,
         seo={
-            "title": article.get("meta_title", article["title"]),
+            "title": article.get("meta_title", article.get("title", "")),
             "description": article.get("meta_description", article.get("excerpt", "")),
             "image": article.get("meta_image"),
         },
     )
+
+@public_bp.route('/includes/<path:filename>')
+def includes_files(filename):
+    """Serve include files (header, footer, etc.)"""
+    # Path ke folder includes
+    includes_dir = os.path.join(current_app.root_path, 'templates', 'public', 'includes')
+    return send_from_directory(includes_dir, filename)
