@@ -1,0 +1,30 @@
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+.env.local
+.env.dev
+.env.production
+.env.production_belum
+.env.development
+.env.test
+.env.docker
+.env.*.local
+# --- TAMBAHAN ---
+.env*
+
+# Docker
+docker-compose.override.yml
+.docker/
+docker-compose.yml
+Dockerfile
+entrypoint.sh
