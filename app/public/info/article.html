@@ -1,0 +1,13 @@
+{% include "public/includes/header.html" %}
+
+<main class="container py-5">
+  <article>
+    <h1>{{ article.title }}</h1>
+
+    <div class="content">
+      {{ article.content | safe }}
+    </div>
+  </article>
+</main>
+
+{% include "public/includes/footer.html" %}

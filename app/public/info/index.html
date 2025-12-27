@@ -1,0 +1,20 @@
+{% include "public/includes/header.html" %}
+
+<main class="container py-5">
+  <h1>Info & Berita</h1>
+
+  {% for article in articles %}
+    <article class="mb-4">
+      <h2>
+        <a href="/info/{{ article.slug }}">
+          {{ article.title }}
+        </a>
+      </h2>
+      <p>{{ article.excerpt }}</p>
+    </article>
+  {% else %}
+    <p>Belum ada artikel.</p>
+  {% endfor %}
+</main>
+
+{% include "public/includes/footer.html" %}
