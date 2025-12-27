@@ -1,15 +1,7 @@
-import traceback
-from google.cloud import firestore
+"""Page-related Firestore services"""
 from datetime import datetime
+from .base_service import get_db, safe_stream_query, get_collection_stats
 from google.cloud.firestore_v1 import FieldFilter
-
-_db = None
-
-def get_db():
-    global _db
-    if _db is None:
-        _db = firestore.Client()
-    return _db
 
 # ===== Pages Services =====
 
@@ -39,6 +31,7 @@ def get_pages():
         
     except Exception as e:
         print(f"❌ Error in get_pages(): {e}")
+        import traceback
         traceback.print_exc()
         return iter([])
 
@@ -66,6 +59,8 @@ def get_all_pages():
         
     except Exception as e:
         print(f"❌ Error in get_all_pages(): {e}")
+        import traceback
+        traceback.print_exc()
         return []
     
 def get_pages_generator():
@@ -98,6 +93,8 @@ def get_page_by_slug(slug):
         
     except Exception as e:
         print(f"⚠️ Error in get_page_by_slug: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def create_page(data):
@@ -122,8 +119,6 @@ def create_page(data):
     db.collection("pages").add(page_data)
     print(f"✅ Page created: {page_data['title']}")
 
-# ===== Pages Services =====
-
 def delete_page(doc_id):
     """Delete page by ID"""
     try:
@@ -133,6 +128,8 @@ def delete_page(doc_id):
         return True
     except Exception as e:
         print(f"❌ Error deleting page {doc_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def get_page_by_id(doc_id):
@@ -147,6 +144,8 @@ def get_page_by_id(doc_id):
             return None
     except Exception as e:
         print(f"❌ Error getting page {doc_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def update_page(doc_id, data):
@@ -173,6 +172,8 @@ def update_page(doc_id, data):
         return True
     except Exception as e:
         print(f"❌ Error updating page {doc_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def get_home_page():
@@ -202,86 +203,3 @@ def get_all_published_pages():
         .where(filter=FieldFilter("slug", "!=", "/"))
         .stream()
     )
-
-# ===== Article Services =====
-
-def get_published_articles(limit=10):
-    """Get published articles"""
-    db = get_db()
-    try:
-        return (
-            db.collection("articles")
-            .where(filter=FieldFilter("published", "==", True))
-            .order_by("created_at", direction=firestore.Query.DESCENDING)
-            .limit(limit)
-            .stream()
-        )
-    except Exception as e:
-        print(f"⚠️ Articles: {e}")
-        return []
-
-def get_article_by_slug(slug):
-    """Get article by slug"""
-    db = get_db()
-    try:
-        docs = (
-            db.collection("articles")
-            .where(filter=FieldFilter("slug", "==", slug))
-            .limit(1)
-            .stream()
-        )
-        for doc in docs:
-            article_data = doc.to_dict()
-            article_data["id"] = doc.id
-            return article_data
-    except Exception as e:
-        print(f"⚠️ Error getting article: {e}")
-    
-    return None
-
-# ===== User Services =====
-
-def get_user_by_email(email):
-    """Get user by email"""
-    db = get_db()
-    docs = (
-        db.collection("users")
-        .where(filter=FieldFilter("email", "==", email))
-        .limit(1)
-        .stream()
-    )
-    for doc in docs:
-        return doc.to_dict()
-    return None
-
-def is_user_admin(user_id):
-    """Check if user is admin"""
-    db = get_db()
-    user_doc = db.collection("users").document(user_id).get()
-    
-    if user_doc.exists:
-        user_data = user_doc.to_dict()
-        return (
-            user_data.get("role") == "admin" or
-            user_data.get("is_admin") == True
-        )
-    
-    return False
-
-# ===== Helper Functions =====
-
-def get_collection_stats():
-    """Get statistics about collections"""
-    db = get_db()
-    stats = {}
-    
-    collections_to_check = ['pages', 'articles', 'users']
-    
-    for col_name in collections_to_check:
-        try:
-            docs = list(db.collection(col_name).limit(1000).stream())
-            stats[col_name] = len(docs)
-        except:
-            stats[col_name] = 0
-    
-    return stats
