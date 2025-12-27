@@ -34,7 +34,7 @@ def home():
         }
     )
 
-@public_bp.route("/<path:slug>")
+@public_bp.route("/<path:slug>/")
 def page_detail(slug):
     """Halaman statis biasa"""
     # Skip slug tertentu
