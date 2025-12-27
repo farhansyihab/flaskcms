@@ -6,17 +6,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{{ seo.description if seo else '' }}">
   
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-180x180.png">
-  <link rel="manifest" href="https://farhansyihab.github.io/abi-firebase/public/site.webmanifest">
+    <!-- Favicon Links (dari GitHub Pages) -->
+    <link rel="icon" type="image/x-icon" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon.ico">
+    <!-- PNG favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/favicon-16x16.png">
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon.png"> <!-- Default size -->
+    <!-- Android Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-chrome-512x512.png">
+    <!-- Android Chrome Maskable Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-chrome-maskable-192x192.png" media="(device-width: 320px) and (device-height: 568px)">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-chrome-maskable-512x512.png" media="(device-width: 320px) and (device-height: 568px)">
+    <!-- Android Launcher Icons -->
+    <link rel="icon" type="image/png" sizes="48x48" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-launchericon-48-48.png">
+    <link rel="icon" type="image/png" sizes="72x72" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-launchericon-72-72.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="https://farhansyihab.github.io/abi-firebase/public/img/icons/android-launchericon-96-96.png">
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#da532c"> <!-- Ganti dengan warna tema Anda -->
+    <meta name="msapplication-TileImage" content="https://farhansyihab.github.io/abi-firebase/public/img/icons/mstile-150x150.png">
+    <link rel="manifest" href="https://farhansyihab.github.io/abi-firebase/public/site.webmanifest"> <!-- Jika Anda memiliki webmanifest -->
 
-  <!-- Bootstrap & Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://farhansyihab.github.io/abi-firebase/public/main.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600;1,700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://farhansyihab.github.io/abi-firebase/public/main.css">
+    <link rel="stylesheet" href="https://farhansyihab.github.io/abi-firebase/public/custom-toast.css">
 </head>
 <body>
 
@@ -55,14 +84,8 @@
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Load header and footer
-fetch("https://farhansyihab.github.io/abi-firebase/public/includes/header.html")
-  .then(r => r.text())
-  .then(t => document.getElementById("header-placeholder").innerHTML = t);
-
-fetch("https://farhansyihab.github.io/abi-firebase/public/includes/footer.html")
-  .then(r => r.text())
-  .then(t => document.getElementById("footer-placeholder").innerHTML = t);
+fetch("/includes/header.html").then(r=>r.text()).then(t=>document.getElementById("header-placeholder").innerHTML=t);
+fetch("/includes/footer.html").then(r=>r.text()).then(t=>document.getElementById("footer-placeholder").innerHTML=t);
 </script>
 
 </body>

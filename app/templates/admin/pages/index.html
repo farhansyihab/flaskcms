@@ -4,40 +4,98 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Halaman</h1>
+    <h1>
+        <i class="bi bi-file-earmark-text"></i> Halaman Website
+        <span class="badge bg-secondary">{{ pages|length }}</span>
+    </h1>
     <a href="{{ url_for('admin.pages_create') }}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Halaman Baru
     </a>
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
 <div class="card">
     <div class="card-body">
         {% if pages %}
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead>
+                <thead class="table-light">
                     <tr>
                         <th>Judul</th>
                         <th>Slug</th>
                         <th>Status</th>
-                        <th>Tanggal</th>
-                        <th>Aksi</th>
+                        <th>Author</th>
+                        <th>Dibuat</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for page in pages %}
                     <tr>
-                        <td>{{ page.title }}</td>
-                        <td>{{ page.slug }}</td>
                         <td>
-                            <span class="badge bg-{{ 'success' if page.status == 'published' else 'warning' }}">
-                                {{ page.status }}
+                            <strong>{{ page.title }}</strong>
+                            {% if page.slug == '/' %}
+                            <span class="badge bg-info ms-2">Beranda</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <code>{{ page.slug }}</code>
+                            {% if page.slug %}
+                            <a href="/{{ page.slug }}" target="_blank" class="ms-1" title="Preview">
+                                <i class="bi bi-box-arrow-up-right text-muted small"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if page.published else 'warning' }}">
+                                {% if page.published %}
+                                <i class="bi bi-check-circle"></i> Published
+                                {% else %}
+                                <i class="bi bi-pencil"></i> Draft
+                                {% endif %}
                             </span>
                         </td>
-                        <td>{{ page.created_at.strftime('%d/%m/%Y') if page.created_at else '-' }}</td>
+                        <td>{{ page.author }}</td>
                         <td>
-                            <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a href="#" class="btn btn-sm btn-outline-danger">Hapus</a>
+                            {% if page.created_at %}
+                                {% if page.created_at is string %}
+                                    {{ page.created_at[:10] }}
+                                {% else %}
+                                    {{ page.created_at.strftime('%d/%m/%Y') }}
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ url_for('admin.pages_edit', page_id=page.id) }}" 
+                                   class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="/{{ page.slug }}" target="_blank" 
+                                   class="btn btn-outline-secondary" title="Preview">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <form method="POST" 
+                                      action="{{ url_for('admin.pages_delete', page_id=page.id) }}" 
+                                      class="d-inline"
+                                      onsubmit="return confirm('Yakin hapus halaman ini?');">
+                                    <button type="submit" class="btn btn-outline-danger" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -46,12 +104,67 @@
         </div>
         {% else %}
         <div class="text-center py-5">
-            <p class="text-muted">Belum ada halaman</p>
-            <a href="{{ url_for('admin.pages_create') }}" class="btn btn-primary">
-                Buat Halaman Pertama
+            <div class="mb-4">
+                <i class="bi bi-file-earmark-text display-1 text-muted"></i>
+            </div>
+            <h4 class="text-muted">Belum ada halaman</h4>
+            <p class="text-muted mb-4">Mulai dengan membuat halaman pertama Anda</p>
+            <a href="{{ url_for('admin.pages_create') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Buat Halaman Pertama
             </a>
         </div>
         {% endif %}
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-file-text"></i> Total
+                </h5>
+                <h2 class="mb-0">{{ pages|length }}</h2>
+                <p class="card-text">Halaman</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-check-circle"></i> Published
+                </h5>
+                <h2 class="mb-0">{{ pages|selectattr('published')|list|length }}</h2>
+                <p class="card-text">Live</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-pencil"></i> Draft
+                </h5>
+                <h2 class="mb-0">{{ pages|rejectattr('published')|list|length }}</h2>
+                <p class="card-text">Dalam Draft</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-house"></i> Homepage
+                </h5>
+                <h2 class="mb-0">
+                    {% set home_pages = pages|selectattr('slug', 'equalto', '/')|list %}
+                    {{ home_pages|length }}
+                </h2>
+                <p class="card-text">Halaman Beranda</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

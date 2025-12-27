@@ -1,3 +1,4 @@
+import traceback
 from google.cloud import firestore
 from datetime import datetime
 from google.cloud.firestore_v1 import FieldFilter
@@ -14,28 +15,90 @@ def get_db():
 
 def get_pages():
     """Get semua pages - untuk admin panel"""
-    db = get_db()
-    return (
-        db.collection("pages")
-        .order_by("create_time", direction=firestore.Query.DESCENDING)
-        .stream()
-    )
+    try:
+        db = get_db()
+        print("🔍 Fetching pages from Firestore...")
+        
+        # Query SEDERHANA tanpa order_by dulu
+        docs = db.collection("pages").stream()
+        
+        docs_list = list(docs)
+        print(f"   Found {len(docs_list)} documents in 'pages' collection")
+        
+        if len(docs_list) == 0:
+            # Debug: coba lihat semua collection dan dokumen
+            print("   ⚠️ No documents found. Checking all collections...")
+            for col in db.collections():
+                col_docs = list(col.limit(5).stream())
+                print(f"   Collection '{col.id}': {len(col_docs)} docs")
+                for doc in col_docs:
+                    print(f"      - {doc.id}: {list(doc.to_dict().keys())}")
+        
+        # Return iterator
+        return iter(docs_list)
+        
+    except Exception as e:
+        print(f"❌ Error in get_pages(): {e}")
+        traceback.print_exc()
+        return iter([])
+
+def get_all_pages():
+    """Get semua pages (versi debug-friendly)"""
+    try:
+        db = get_db()
+        docs_ref = db.collection("pages").stream()
+        
+        pages = []
+        for doc in docs_ref:
+            page_data = doc.to_dict()
+            page_data["id"] = doc.id
+            
+            # Tambahkan timestamp dokumen
+            if hasattr(doc, 'create_time'):
+                page_data["firestore_create_time"] = doc.create_time
+            if hasattr(doc, 'update_time'):
+                page_data["firestore_update_time"] = doc.update_time
+            
+            pages.append(page_data)
+        
+        print(f"✅ get_all_pages() found {len(pages)} pages")
+        return pages
+        
+    except Exception as e:
+        print(f"❌ Error in get_all_pages(): {e}")
+        return []
+    
+def get_pages_generator():
+    """Generator version for compatibility"""
+    pages = get_all_pages()
+    for page in pages:
+        yield page
 
 def get_page_by_slug(slug):
     """Get page by slug - untuk public access"""
     db = get_db()
-    docs = (
-        db.collection("pages")
-        .where(filter=FieldFilter("slug", "==", slug))
-        .where(filter=FieldFilter("published", "==", True))
-        .limit(1)
-        .stream()
-    )
-    for doc in docs:
-        page_data = doc.to_dict()
-        page_data["id"] = doc.id
-        return page_data
-    return None
+    try:
+        print(f"🔍 Looking for page with slug: '{slug}'")
+        docs = (
+            db.collection("pages")
+            .where(filter=FieldFilter("slug", "==", slug))
+            .where(filter=FieldFilter("published", "==", True))
+            .limit(1)
+            .stream()
+        )
+        
+        docs_list = list(docs)
+        print(f"   Found {len(docs_list)} documents for slug '{slug}'")
+        
+        for doc in docs_list:
+            page_data = doc.to_dict()
+            page_data["id"] = doc.id
+            return page_data
+        return None
+        
+    except Exception as e:
+        print(f"⚠️ Error in get_page_by_slug: {e}")
+        return None
 
 def create_page(data):
     """Create new page"""
@@ -59,16 +122,58 @@ def create_page(data):
     db.collection("pages").add(page_data)
     print(f"✅ Page created: {page_data['title']}")
 
-def update_page(doc_id, data):
-    """Update existing page"""
-    db = get_db()
-    data["updated_at"] = datetime.utcnow()
-    db.collection("pages").document(doc_id).update(data)
+# ===== Pages Services =====
+
+def delete_page(doc_id):
+    """Delete page by ID"""
+    try:
+        db = get_db()
+        db.collection("pages").document(doc_id).delete()
+        print(f"✅ Page {doc_id} deleted")
+        return True
+    except Exception as e:
+        print(f"❌ Error deleting page {doc_id}: {e}")
+        return False
 
 def get_page_by_id(doc_id):
     """Get page by document ID"""
-    db = get_db()
-    return db.collection("pages").document(doc_id).get()
+    try:
+        db = get_db()
+        doc = db.collection("pages").document(doc_id).get()
+        if doc.exists:
+            return doc
+        else:
+            print(f"⚠️ Page {doc_id} not found")
+            return None
+    except Exception as e:
+        print(f"❌ Error getting page {doc_id}: {e}")
+        return None
+
+def update_page(doc_id, data):
+    """Update existing page"""
+    try:
+        db = get_db()
+        
+        # Flatten nested fields (like seo.title)
+        flat_data = {}
+        for key, value in data.items():
+            if '.' in key:
+                # Handle nested field updates
+                parts = key.split('.')
+                if parts[0] not in flat_data:
+                    flat_data[parts[0]] = {}
+                flat_data[parts[0]][parts[1]] = value
+            else:
+                flat_data[key] = value
+        
+        flat_data["updated_at"] = datetime.utcnow()
+        
+        db.collection("pages").document(doc_id).update(flat_data)
+        print(f"✅ Page {doc_id} updated")
+        return True
+    except Exception as e:
+        print(f"❌ Error updating page {doc_id}: {e}")
+        return False
 
 def get_home_page():
     """Get homepage - khusus untuk slug '/'"""
