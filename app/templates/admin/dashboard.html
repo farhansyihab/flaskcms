@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard - Admin ABI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Dashboard</h1>
+    <a href="{{ url_for('admin.pages_create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Buat Halaman Baru
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Halaman</h5>
+                <p class="card-text">Kelola halaman website</p>
+                <a href="{{ url_for('admin.pages_index') }}" class="btn btn-outline-primary">
+                    Lihat Halaman
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Berita</h5>
+                <p class="card-text">Kelola berita/artikel</p>
+                <a href="{{ url_for('admin.news_index') }}" class="btn btn-outline-primary">
+                    Lihat Berita
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pengguna</h5>
+                <p class="card-text">{{ g.user.name }}</p>
+                <a href="{{ url_for('admin.logout') }}" class="btn btn-outline-danger">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

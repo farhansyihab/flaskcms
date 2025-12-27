@@ -79,3 +79,45 @@ def update_page(doc_id, data):
     db = get_db()
     data["updated_at"] = datetime.utcnow()
     db.collection("pages").document(doc_id).update(data)
+
+# ===== Helper Functions =====
+
+def get_home_page():
+    """Mendapatkan halaman beranda (slug: home atau beranda)"""
+    db = get_db()
+    
+    # Coba cari dengan slug 'home'
+    docs = (
+        db.collection("pages")
+        .where("slug", "==", "home")
+        .where("status", "==", "published")
+        .limit(1)
+        .stream()
+    )
+    
+    for doc in docs:
+        return doc.to_dict()
+    
+    # Jika tidak ada, coba 'beranda'
+    docs = (
+        db.collection("pages")
+        .where("slug", "==", "beranda")
+        .where("status", "==", "published")
+        .limit(1)
+        .stream()
+    )
+    
+    for doc in docs:
+        return doc.to_dict()
+    
+    return None
+
+
+def get_all_published_pages():
+    """Mendapatkan semua halaman yang published"""
+    db = get_db()
+    return (
+        db.collection("pages")
+        .where("status", "==", "published")
+        .stream()
+    )

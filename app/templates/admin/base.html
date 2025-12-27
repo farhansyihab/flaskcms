@@ -20,7 +20,7 @@
       <a href="/admin/" class="list-group-item list-group-item-action">Dashboard</a>
       <a href="/admin/news" class="list-group-item list-group-item-action">Berita</a>
       <a href="/admin/pages" class="list-group-item list-group-item-action">Halaman</a>
-      <a href="/auth/logout" class="list-group-item list-group-item-action text-danger">Logout</a>
+      <a href="/admin/logout" class="list-group-item list-group-item-action text-danger">Logout</a>
     </div>
   </div>
 
@@ -28,7 +28,11 @@
   <div id="page-content-wrapper">
     <nav class="navbar navbar-light bg-white border-bottom px-3">
       <button class="btn btn-outline-secondary" id="menu-toggle">☰</button>
-      <span class="ms-auto">{{ current_user.email }}</span>
+      {% if g.user %}
+        <span class="ms-auto">{{ g.user.email }}</span>
+      {% else %}
+        <span class="ms-auto">Not logged in</span>
+      {% endif %}
     </nav>
 
     <div class="container-fluid py-4">
