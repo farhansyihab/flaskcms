@@ -98,8 +98,22 @@ def get_page_by_slug(slug):
         return None
 
 def create_page(data):
-    """Create new page"""
+    """Create new page with SEO metadata"""
     db = get_db()
+    
+    # Default SEO data
+    default_seo = {
+        "title": data.get("title", ""),
+        "description": data.get("meta_description", "")[:160] if data.get("meta_description") else "",
+        "image": data.get("meta_image", ""),
+        "og_title": data.get("meta_title", data.get("title", "")),
+        "og_description": data.get("meta_description", "")[:300] if data.get("meta_description") else "",
+        "og_image": data.get("meta_image", ""),
+        "twitter_card": "summary_large_image",
+        "twitter_title": data.get("meta_title", data.get("title", "")),
+        "twitter_description": data.get("meta_description", "")[:200] if data.get("meta_description") else "",
+        "twitter_image": data.get("meta_image", "")
+    }
     
     page_data = {
         "title": data.get("title", ""),
@@ -107,17 +121,40 @@ def create_page(data):
         "content_html": data.get("content", ""),
         "published": data.get("status") == "published",
         "seo": {
+            **default_seo,
+            # Override dengan data dari form jika ada
             "title": data.get("meta_title", data.get("title", "")),
             "description": data.get("meta_description", ""),
-            "image": data.get("meta_image", "")
+            "image": data.get("meta_image", ""),
+            "og_title": data.get("meta_title", data.get("title", "")),
+            "og_description": data.get("meta_description", ""),
+            "og_image": data.get("meta_image", ""),
+            "twitter_title": data.get("meta_title", data.get("title", "")),
+            "twitter_description": data.get("meta_description", ""),
+            "twitter_image": data.get("meta_image", "")
         }
     }
     
     if "author" in data:
         page_data["author"] = data["author"]
     
+    # Schema.org data sederhana
+    page_data["schema"] = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": page_data["title"],
+        "description": page_data["seo"]["description"][:160] if page_data["seo"]["description"] else "",
+        "url": f"https://abisumsel.org/{page_data['slug']}" if page_data['slug'] != '/' else "https://abisumsel.org",
+        "publisher": {
+            "@type": "Organization",
+            "name": "DPW ABI Sumatera Selatan",
+            "url": "https://abisumsel.org"
+        }
+    }
+    
     db.collection("pages").add(page_data)
-    print(f"✅ Page created: {page_data['title']}")
+    print(f"✅ Page created with SEO: {page_data['title']}")
+
 
 def delete_page(doc_id):
     """Delete page by ID"""

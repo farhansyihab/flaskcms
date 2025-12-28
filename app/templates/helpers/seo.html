@@ -1,0 +1,81 @@
+<!-- SEO Metadata Generator - Simple Version -->
+{% macro render_seo_metadata(page=None, article=None, default_title="DPW ABI Sumatera Selatan", default_description="Website resmi DPW ABI Sumatera Selatan", default_image="https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-180x180.png") %}
+    {% if page %}
+        {% set seo = page.seo if page.seo else {} %}
+        {% set title = seo.title if seo.title else page.title if page.title else default_title %}
+        {% set description = seo.description if seo.description else default_description %}
+        {% set image = seo.image if seo.image else default_image %}
+        {% set og_title = seo.og_title if seo.og_title else title %}
+        {% set og_description = seo.og_description if seo.og_description else description %}
+        {% set og_image = seo.og_image if seo.og_image else image %}
+        {% set twitter_card = seo.twitter_card if seo.twitter_card else "summary_large_image" %}
+        {% set twitter_title = seo.twitter_title if seo.twitter_title else title %}
+        {% set twitter_description = seo.twitter_description if seo.twitter_description else description %}
+        {% set twitter_image = seo.twitter_image if seo.twitter_image else image %}
+        {% set schema = page.schema if page.schema else {} %}
+    {% elif article %}
+        {% set title = article.meta_title if article.meta_title else article.title if article.title else default_title %}
+        {% set description = article.meta_description if article.meta_description else article.excerpt if article.excerpt else default_description %}
+        {% set image = article.meta_image if article.meta_image else default_image %}
+        {% set og_title = title %}
+        {% set og_description = description %}
+        {% set og_image = image %}
+        {% set twitter_card = "summary_large_image" %}
+        {% set twitter_title = title %}
+        {% set twitter_description = description %}
+        {% set twitter_image = image %}
+    {% else %}
+        {% set title = default_title %}
+        {% set description = default_description %}
+        {% set image = default_image %}
+        {% set og_title = default_title %}
+        {% set og_description = default_description %}
+        {% set og_image = default_image %}
+        {% set twitter_card = "summary_large_image" %}
+        {% set twitter_title = default_title %}
+        {% set twitter_description = default_description %}
+        {% set twitter_image = default_image %}
+    {% endif %}
+
+    <!-- Basic Meta Tags -->
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ description[:160] }}">
+    
+    <!-- Open Graph (Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url if request else 'https://abisumsel.org' }}">
+    <meta property="og:title" content="{{ og_title[:60] }}">
+    <meta property="og:description" content="{{ og_description[:300] }}">
+    <meta property="og:image" content="{{ og_image }}">
+    <meta property="og:site_name" content="DPW ABI Sumatera Selatan">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="{{ twitter_card }}">
+    <meta name="twitter:title" content="{{ twitter_title[:60] }}">
+    <meta name="twitter:description" content="{{ twitter_description[:200] }}">
+    <meta name="twitter:image" content="{{ twitter_image }}">
+    
+    <!-- Schema.org JSON-LD (SIMPLE VERSION) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "{% if page and page.slug == '/' %}WebSite{% else %}WebPage{% endif %}",
+        "name": "{{ title|replace('"', '\\"') }}",
+        "description": "{{ description[:160]|replace('"', '\\"') }}",
+        "url": "{{ request.url if request else 'https://abisumsel.org' }}",
+        {% if page and page.schema and page.schema.publisher %}
+        "publisher": {
+            "@type": "Organization",
+            "name": "{{ page.schema.publisher.name|replace('"', '\\"') if page.schema.publisher.name else 'DPW ABI Sumatera Selatan' }}",
+            "url": "{{ page.schema.publisher.url if page.schema.publisher.url else 'https://abisumsel.org' }}"
+        }
+        {% else %}
+        "publisher": {
+            "@type": "Organization",
+            "name": "DPW ABI Sumatera Selatan",
+            "url": "https://abisumsel.org"
+        }
+        {% endif %}
+    }
+    </script>
+{% endmacro %}
