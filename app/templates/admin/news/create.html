@@ -1,0 +1,114 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Buat Artikel Baru - Admin ABI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Buat Artikel Baru</h1>
+    <a href="{{ url_for('admin.news_index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="title" class="form-label">Judul Artikel *</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="slug" class="form-label">Slug *</label>
+                <input type="text" class="form-control" id="slug" name="slug" required>
+                <div class="form-text">Contoh: <code>sejarah-singkat-abi-2025</code></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="excerpt" class="form-label">Ringkasan (Excerpt)</label>
+                <textarea class="form-control" id="excerpt" name="excerpt" rows="3" maxlength="300"></textarea>
+                <div class="form-text">Ringkasan singkat untuk halaman daftar artikel (maks 300 karakter).</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="content" class="form-label">Konten</label>
+                <textarea class="form-control" id="content" name="content" rows="15" placeholder="Konten artikel..."></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="draft">Draft</option>
+                    <option value="published" selected>Published</option>
+                </select>
+            </div>
+            
+            <h5 class="mt-4 mb-3">SEO Metadata</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="meta_title" class="form-label">Meta Title</label>
+                    <input type="text" class="form-control" id="meta_title" name="meta_title" maxlength="60">
+                    <div class="form-text">Maksimal 60 karakter (untuk Google & OG)</div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="meta_image" class="form-label">Gambar SEO</label>
+                    <input type="text" class="form-control" id="meta_image" name="meta_image" placeholder="https://example.com/image.jpg">
+                    <div class="form-text">URL gambar untuk OG & Twitter (rekomendasi: 1200x630px)</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="meta_description" class="form-label">Meta Description</label>
+                <textarea class="form-control" id="meta_description" name="meta_description" rows="3" maxlength="160"></textarea>
+                <div class="form-text">
+                    Deskripsi untuk Google (maks 160 karakter). 
+                    <span id="charCount">0/160</span>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Simpan Artikel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-generate slug from title
+document.getElementById('title').addEventListener('input', function(e) {
+    const title = e.target.value;
+    const slug = title.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/--+/g, '-')
+        .trim();
+    document.getElementById('slug').value = slug;
+    
+    // Auto-fill meta title jika kosong
+    if (!document.getElementById('meta_title').value) {
+        document.getElementById('meta_title').value = title.substring(0, 60);
+    }
+});
+
+// Character counter for meta description
+document.getElementById('meta_description').addEventListener('input', function(e) {
+    const count = e.target.value.length;
+    document.getElementById('charCount').textContent = count + '/160';
+});
+
+// Auto-generate excerpt from content if empty
+document.getElementById('content').addEventListener('input', function(e) {
+    const excerptField = document.getElementById('excerpt');
+    if (!excerptField.value && e.target.value) {
+        const content = e.target.value.replace(/<[^>]*>/g, ''); // Strip HTML
+        const excerpt = content.substring(0, 300).trim();
+        if (excerpt.length >= 50) {
+            excerptField.value = excerpt;
+        }
+    }
+});
+</script>
+{% endblock %}

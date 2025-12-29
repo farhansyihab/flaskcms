@@ -1,20 +1,66 @@
-{% include "public/includes/header.html" %}
+{% extends "public/base.html" %}
+
+{% block content %}
+<div id="header-placeholder"></div>
 
 <main class="container py-5">
-  <h1>Info & Berita</h1>
-
-  {% for article in articles %}
-    <article class="mb-4">
-      <h2>
-        <a href="/info/{{ article.slug }}">
-          {{ article.title }}
-        </a>
-      </h2>
-      <p>{{ article.excerpt }}</p>
-    </article>
-  {% else %}
-    <p>Belum ada artikel.</p>
-  {% endfor %}
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Beranda</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Info & Berita</li>
+        </ol>
+    </nav>
+    
+    <h1 class="mb-4">Info & Berita ABI Sumsel</h1>
+    
+    {% if articles %}
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="/info/{{ article.slug }}/" class="text-decoration-none">
+                                {{ article.title }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small">
+                            <i class="bi bi-person"></i> {{ article.author if article.author else 'Admin' }}
+                            <i class="bi bi-calendar ms-3"></i> 
+                            {% if article.created_at %}
+                                {% if article.created_at is string %}
+                                    {{ article.created_at[:10] }}
+                                {% else %}
+                                    {{ article.created_at.strftime('%d %b %Y') }}
+                                {% endif %}
+                            {% endif %}
+                        </p>
+                        {% if article.excerpt %}
+                            <p class="card-text">{{ article.excerpt[:200] }}...</p>
+                        {% elif article.content %}
+                            <p class="card-text">{{ article.content|striptags|truncate(200) }}</p>
+                        {% endif %}
+                        <a href="/info/{{ article.slug }}/" class="btn btn-outline-primary btn-sm">
+                            Baca selengkapnya
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-newspaper display-1 text-muted"></i>
+            <h4 class="mt-4 text-muted">Belum ada artikel</h4>
+            <p class="text-muted">Silakan kembali lagi nanti.</p>
+        </div>
+    {% endif %}
 </main>
 
-{% include "public/includes/footer.html" %}
+<div id="footer-placeholder"></div>
+
+<script>
+fetch("/includes/header.html").then(r=>r.text()).then(t=>document.getElementById("header-placeholder").innerHTML=t);
+fetch("/includes/footer.html").then(r=>r.text()).then(t=>document.getElementById("footer-placeholder").innerHTML=t);
+</script>
+{% endblock %}

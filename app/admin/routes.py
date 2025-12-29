@@ -6,7 +6,13 @@ from app.services.firestore import (
     create_page, 
     update_page, 
     delete_page, 
-    get_page_by_id
+    get_page_by_id,
+    get_published_articles,
+    create_article,
+    update_article,
+    delete_article,
+    get_article_by_id,
+    get_article_by_slug
 )
 from datetime import datetime
 import traceback
@@ -175,7 +181,136 @@ def pages_delete(page_id):
 @admin_bp.route("/news")
 @admin_required
 def news_index():
-    return render_template("admin/news/index.html")
+    try:
+        print("📰 Loading articles from Firestore...")
+        
+        # get_published_articles() sekarang return list of dict, bukan DocumentSnapshot
+        articles = get_published_articles(limit=50)
+        
+        # Artikel sudah di-sort di fungsi get_published_articles()
+        # Pastikan semua artikel punya field yang dibutuhkan
+        for article in articles:
+            if "created_at" not in article:
+                article["created_at"] = datetime.utcnow()
+            if "author" not in article:
+                article["author"] = "Unknown"
+        
+        print(f"📊 Total articles loaded: {len(articles)}")
+        
+    except Exception as e:
+        print(f"❌ Error in news_index: {e}")
+        traceback.print_exc()
+        articles = []
+        flash("Error loading articles", "danger")
+    
+    return render_template("admin/news/index.html", articles=articles)
+
+@admin_bp.route("/news/create", methods=["GET", "POST"])
+@admin_required
+def news_create():
+    if request.method == "POST":
+        try:
+            print("📝 Creating new article...")
+            
+            article_data = {
+                "title": request.form.get("title", "").strip(),
+                "slug": request.form.get("slug", "").strip(),
+                "content": request.form.get("content", ""),
+                "excerpt": request.form.get("excerpt", "").strip() or request.form.get("content", "")[:150],
+                "published": request.form.get("status") == "published",
+                "author": g.user.get("name", "Unknown") if g.user else "Unknown",
+                "created_at": datetime.utcnow(),
+                "meta_title": request.form.get("meta_title", "").strip() or request.form.get("title", "").strip(),
+                "meta_description": request.form.get("meta_description", "").strip(),
+                "meta_image": request.form.get("meta_image", "").strip()
+            }
+            
+            # Validasi
+            if not article_data["title"]:
+                flash("Title is required", "danger")
+                return render_template("admin/news/create.html")
+            
+            if not article_data["slug"]:
+                flash("Slug is required", "danger")
+                return render_template("admin/news/create.html")
+            
+            create_article(article_data)
+            flash("Article created successfully!", "success")
+            print("✅ Article created successfully!")
+            
+            return redirect(url_for("admin.news_index"))
+            
+        except Exception as e:
+            print(f"❌ Error creating article: {e}")
+            traceback.print_exc()
+            flash(f"Error creating article: {str(e)}", "danger")
+            return render_template("admin/news/create.html")
+    
+    return render_template("admin/news/create.html")
+
+@admin_bp.route("/news/<article_id>/edit", methods=["GET", "POST"])
+@admin_required
+def news_edit(article_id):
+    try:
+        # Get article data
+        doc = get_article_by_id(article_id)
+        if not doc or not doc.exists:
+            flash("Article not found", "danger")
+            return redirect(url_for("admin.news_index"))
+        
+        article_data = doc.to_dict()
+        article_data["id"] = doc.id
+        
+        if request.method == "POST":
+            # Update article
+            update_data = {
+                "title": request.form.get("title", "").strip(),
+                "slug": request.form.get("slug", "").strip(),
+                "content": request.form.get("content", ""),
+                "excerpt": request.form.get("excerpt", "").strip(),
+                "published": request.form.get("status") == "published",
+                "meta_title": request.form.get("meta_title", "").strip(),
+                "meta_description": request.form.get("meta_description", "").strip(),
+                "meta_image": request.form.get("meta_image", "").strip(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            # Jika author belum ada, tambahkan
+            if "author" not in article_data or not article_data["author"]:
+                update_data["author"] = g.user.get("name", "Unknown") if g.user else "Unknown"
+            
+            update_article(article_id, update_data)
+            flash("Article updated successfully!", "success")
+            return redirect(url_for("admin.news_index"))
+        
+        # Convert boolean published to string status for form
+        article_data["status"] = "published" if article_data.get("published", False) else "draft"
+        
+        # Pastikan field ada
+        if "meta_title" not in article_data:
+            article_data["meta_title"] = article_data.get("title", "")
+        if "meta_description" not in article_data:
+            article_data["meta_description"] = article_data.get("excerpt", "")
+        if "meta_image" not in article_data:
+            article_data["meta_image"] = ""
+        
+        return render_template("admin/news/edit.html", article=article_data)
+        
+    except Exception as e:
+        print(f"❌ Error editing article: {e}")
+        traceback.print_exc()
+        flash(f"Error editing article: {str(e)}", "danger")
+        return redirect(url_for("admin.news_index"))
+
+@admin_bp.route("/news/<article_id>/delete", methods=["POST"])
+@admin_required
+def news_delete(article_id):
+    try:
+        delete_article(article_id)
+        flash("Article deleted successfully!", "success")
+    except Exception as e:
+        flash(f"Error deleting article: {str(e)}", "danger")
+    return redirect(url_for("admin.news_index"))
 
 @admin_bp.route("/logout")
 def logout():

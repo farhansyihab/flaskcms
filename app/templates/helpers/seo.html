@@ -43,7 +43,7 @@
     
     <!-- Open Graph (Facebook) -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request.url if request else 'https://abisumsel.org' }}">
+    <meta property="og:url" content="{{ request.url if request else 'https://abi-sumsel.my.id' }}">
     <meta property="og:title" content="{{ og_title[:60] }}">
     <meta property="og:description" content="{{ og_description[:300] }}">
     <meta property="og:image" content="{{ og_image }}">
@@ -62,18 +62,18 @@
         "@type": "{% if page and page.slug == '/' %}WebSite{% else %}WebPage{% endif %}",
         "name": "{{ title|replace('"', '\\"') }}",
         "description": "{{ description[:160]|replace('"', '\\"') }}",
-        "url": "{{ request.url if request else 'https://abisumsel.org' }}",
+        "url": "{{ request.url if request else 'https://abi-sumsel.my.id' }}",
         {% if page and page.schema and page.schema.publisher %}
         "publisher": {
             "@type": "Organization",
             "name": "{{ page.schema.publisher.name|replace('"', '\\"') if page.schema.publisher.name else 'DPW ABI Sumatera Selatan' }}",
-            "url": "{{ page.schema.publisher.url if page.schema.publisher.url else 'https://abisumsel.org' }}"
+            "url": "{{ page.schema.publisher.url if page.schema.publisher.url else 'https://abi-sumsel.my.id' }}"
         }
         {% else %}
         "publisher": {
             "@type": "Organization",
             "name": "DPW ABI Sumatera Selatan",
-            "url": "https://abisumsel.org"
+            "url": "https://abi-sumsel.my.id"
         }
         {% endif %}
     }

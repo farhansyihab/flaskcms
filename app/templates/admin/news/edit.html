@@ -1,0 +1,169 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Edit Artikel - Admin ABI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Edit Artikel</h1>
+    <a href="{{ url_for('admin.news_index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="title" class="form-label">Judul Artikel *</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                       value="{{ article.title if article.title else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="slug" class="form-label">Slug *</label>
+                <input type="text" class="form-control" id="slug" name="slug" 
+                       value="{{ article.slug if article.slug else '' }}" required>
+                <div class="form-text">Contoh: <code>sejarah-singkat-abi-2025</code></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="excerpt" class="form-label">Ringkasan (Excerpt)</label>
+                <textarea class="form-control" id="excerpt" name="excerpt" rows="3" maxlength="300">{{ article.excerpt if article.excerpt else '' }}</textarea>
+                <div class="form-text">Ringkasan singkat untuk halaman daftar artikel (maks 300 karakter).</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="content" class="form-label">Konten</label>
+                <textarea class="form-control" id="content" name="content" rows="15" placeholder="Konten artikel...">{{ article.content if article.content else '' }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="draft" {% if article.status == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="published" {% if article.status == 'published' %}selected{% endif %}>Published</option>
+                </select>
+            </div>
+            
+            <h5 class="mt-4 mb-3">SEO Metadata</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="meta_title" class="form-label">Meta Title</label>
+                    <input type="text" class="form-control" id="meta_title" name="meta_title" 
+                           value="{{ article.meta_title if article.meta_title else '' }}" maxlength="60">
+                    <div class="form-text">Maksimal 60 karakter (untuk Google & OG)</div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="meta_image" class="form-label">Gambar SEO</label>
+                    <input type="text" class="form-control" id="meta_image" name="meta_image" 
+                           value="{{ article.meta_image if article.meta_image else '' }}" 
+                           placeholder="https://example.com/image.jpg">
+                    <div class="form-text">URL gambar untuk OG & Twitter (rekomendasi: 1200x630px)</div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="meta_description" class="form-label">Meta Description</label>
+                <textarea class="form-control" id="meta_description" name="meta_description" rows="3" maxlength="160">{{ article.meta_description if article.meta_description else '' }}</textarea>
+                <div class="form-text">
+                    Deskripsi untuk Google (maks 160 karakter). 
+                    <span id="charCount">{{ (article.meta_description|length if article.meta_description else 0) }}/160</span>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Update Artikel
+                </button>
+                
+                {% if article.id %}
+                <button type="button" class="btn btn-danger ms-2" 
+                        onclick="if(confirm('Yakin hapus artikel ini?')) { 
+                            window.location.href='{{ url_for('admin.news_delete', article_id=article.id) }}' 
+                        }">
+                    <i class="bi bi-trash"></i> Hapus
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-generate slug from title jika kosong
+document.getElementById('title').addEventListener('input', function(e) {
+    const slugField = document.getElementById('slug');
+    if (!slugField.value || slugField.value === '{{ article.slug if article.slug else '' }}') {
+        const title = e.target.value;
+        const slug = title.toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/--+/g, '-')
+            .trim();
+        slugField.value = slug;
+    }
+    
+    // Auto-fill meta title jika kosong
+    const metaTitleField = document.getElementById('meta_title');
+    if (!metaTitleField.value || metaTitleField.value === '{{ article.meta_title if article.meta_title else '' }}') {
+        metaTitleField.value = e.target.value.substring(0, 60);
+    }
+});
+
+// Character counter for meta description
+const metaDescField = document.getElementById('meta_description');
+metaDescField.addEventListener('input', function(e) {
+    const count = e.target.value.length;
+    document.getElementById('charCount').textContent = count + '/160';
+});
+
+// Auto-generate meta description from content if empty
+document.getElementById('content').addEventListener('input', function(e) {
+    const metaDescField = document.getElementById('meta_description');
+    const currentDesc = '{{ article.meta_description if article.meta_description else '' }}';
+    
+    if ((!metaDescField.value || metaDescField.value === currentDesc) && e.target.value) {
+        // Strip HTML tags untuk membuat plain text
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = e.target.value;
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        
+        const excerpt = plainText.substring(0, 160).trim();
+        if (excerpt.length >= 50) {
+            metaDescField.value = excerpt;
+            document.getElementById('charCount').textContent = excerpt.length + '/160';
+        }
+    }
+});
+
+// Auto-generate excerpt from content if empty
+document.getElementById('content').addEventListener('input', function(e) {
+    const excerptField = document.getElementById('excerpt');
+    const currentExcerpt = '{{ article.excerpt if article.excerpt else '' }}';
+    
+    if ((!excerptField.value || excerptField.value === currentExcerpt) && e.target.value) {
+        // Strip HTML tags untuk membuat plain text
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = e.target.value;
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        
+        const excerpt = plainText.substring(0, 300).trim();
+        if (excerpt.length >= 50) {
+            excerptField.value = excerpt;
+        }
+    }
+});
+</script>
+{% endblock %}

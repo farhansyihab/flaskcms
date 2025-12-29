@@ -6,21 +6,44 @@ from google.cloud.firestore_v1 import FieldFilter
 # ===== Article Services =====
 
 def get_published_articles(limit=10):
-    """Get published articles"""
+    """Get published articles - SIMPLE VERSION tanpa order_by"""
     db = get_db()
     try:
-        return (
+        # Query sederhana tanpa order_by untuk hindari index
+        docs = (
             db.collection("articles")
             .where(filter=FieldFilter("published", "==", True))
-            .order_by("created_at", direction=firestore.Query.DESCENDING)
             .limit(limit)
             .stream()
         )
+        
+        # Konversi ke list dan sort manual di Python
+        articles_list = []
+        for doc in docs:
+            article_data = doc.to_dict()
+            article_data["id"] = doc.id
+            articles_list.append(article_data)
+        
+        # Sort manual berdasarkan created_at (baru ke tertua)
+        articles_list.sort(
+            key=lambda x: x.get("created_at") or "", 
+            reverse=True
+        )
+        
+        print(f"✅ Loaded {len(articles_list)} articles (sorted locally)")
+        return articles_list
+        
     except Exception as e:
-        print(f"⚠️ Articles: {e}")
+        print(f"⚠️ Articles error: {e}")
         import traceback
         traceback.print_exc()
         return []
+    
+def get_published_articles_generator(limit=10):
+    """Generator version for compatibility"""
+    articles = get_published_articles(limit)
+    for article in articles:
+        yield article    
 
 def get_article_by_slug(slug):
     """Get article by slug"""

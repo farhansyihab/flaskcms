@@ -1,13 +1,57 @@
-{% include "public/includes/header.html" %}
+{% extends "public/base.html" %}
+
+{% block content %}
+<div id="header-placeholder"></div>
 
 <main class="container py-5">
-  <article>
-    <h1>{{ article.title }}</h1>
-
-    <div class="content">
-      {{ article.content | safe }}
-    </div>
-  </article>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="/info/">Info & Berita</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ article.title }}</li>
+        </ol>
+    </nav>
+    
+    <article>
+        <header class="mb-4">
+            <h1>{{ article.title }}</h1>
+            <div class="text-muted small mb-3">
+                <i class="bi bi-person"></i> {{ article.author if article.author else 'Admin' }}
+                <i class="bi bi-calendar ms-3"></i> 
+                {% if article.created_at %}
+                    {% if article.created_at is string %}
+                        {{ article.created_at[:10] }}
+                    {% else %}
+                        {{ article.created_at.strftime('%d %B %Y') }}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </header>
+        
+        <div class="article-content">
+            {% if article.content %}
+                {{ article.content|safe }}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Konten artikel ini belum tersedia.
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Navigation buttons -->
+        <div class="mt-5 pt-3 border-top">
+            <a href="/info/" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Kembali ke Daftar Artikel
+            </a>
+        </div>
+    </article>
 </main>
 
-{% include "public/includes/footer.html" %}
+<div id="footer-placeholder"></div>
+
+<script>
+fetch("/includes/header.html").then(r=>r.text()).then(t=>document.getElementById("header-placeholder").innerHTML=t);
+fetch("/includes/footer.html").then(r=>r.text()).then(t=>document.getElementById("footer-placeholder").innerHTML=t);
+</script>
+{% endblock %}

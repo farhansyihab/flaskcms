@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, render_template, abort, request, send_
 import os
 
 from app.services.firestore import (
-    get_published_articles,
+    get_published_articles,  # ← fungsi baru sudah return list of dict
     get_article_by_slug,
     get_home_page,
     get_page_by_slug,
@@ -98,6 +98,55 @@ def article_detail(slug):
         "public/info/article.html",
         article=article
     )
+
+@public_bp.route("/info/")
+def article_list():
+    """Halaman daftar artikel"""
+    try:
+        articles = get_published_articles(limit=20)  # ← sudah list of dict
+        
+        return render_template(
+            "public/info/index.html",
+            articles=articles,
+            page={  # Untuk SEO
+                "title": "Info & Berita - DPW ABI Sumatera Selatan",
+                "seo": {
+                    "title": "Info & Berita - DPW ABI Sumatera Selatan",
+                    "description": "Kumpulan berita dan informasi terkini dari DPW ABI Sumatera Selatan",
+                    "image": DEFAULT_IMAGE,
+                    "og_title": "Info & Berita - DPW ABI Sumatera Selatan",
+                    "og_description": "Kumpulan berita dan informasi terkini dari DPW ABI Sumatera Selatan",
+                    "og_image": DEFAULT_IMAGE,
+                    "twitter_card": "summary_large_image",
+                    "twitter_title": "Info & Berita - DPW ABI Sumatera Selatan",
+                    "twitter_description": "Kumpulan berita dan informasi terkini dari DPW ABI Sumatera Selatan",
+                    "twitter_image": DEFAULT_IMAGE
+                }
+            }
+        )
+    except Exception as e:
+        print(f"❌ Error loading articles: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template(
+            "public/info/index.html",
+            articles=[],
+            page={
+                "title": "Info & Berita",
+                "seo": {
+                    "title": "Info & Berita - DPW ABI Sumatera Selatan",
+                    "description": "Kumpulan berita dan informasi terkini",
+                    "image": DEFAULT_IMAGE,
+                    "og_title": "Info & Berita - DPW ABI Sumatera Selatan",
+                    "og_description": "Kumpulan berita dan informasi terkini",
+                    "og_image": DEFAULT_IMAGE,
+                    "twitter_card": "summary_large_image",
+                    "twitter_title": "Info & Berita - DPW ABI Sumatera Selatan",
+                    "twitter_description": "Kumpulan berita dan informasi terkini",
+                    "twitter_image": DEFAULT_IMAGE
+                }
+            }
+        )
 
 @public_bp.route('/includes/<path:filename>')
 def includes_files(filename):
