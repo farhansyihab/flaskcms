@@ -9,7 +9,12 @@ class URLGenerator:
     """Generator URL untuk static site"""
     
     def __init__(self, backup_file=None):
-        self.backup_file = backup_file or self.get_latest_backup()
+        # Konversi ke Path jika backup_file adalah string
+        if backup_file and isinstance(backup_file, str):
+            self.backup_file = Path(backup_file)
+        else:
+            self.backup_file = backup_file or self.get_latest_backup()
+        
         self.data = self.load_backup_data()
         
     def get_latest_backup(self):
