@@ -1,0 +1,213 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+<div id="header-placeholder"></div>
+
+<main class="container py-5">
+    <h1 class="mb-4">Pencarian</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="mb-4">
+                <div class="input-group">
+                    <input type="text" id="search-input" class="form-control" 
+                           placeholder="Cari artikel atau halaman..." autocomplete="off">
+                    <button class="btn btn-primary" id="search-button">
+                        <i class="bi bi-search"></i> Cari
+                    </button>
+                </div>
+            </div>
+            
+            <div id="search-results" class="mt-4">
+                <div class="text-center text-muted">
+                    <i class="bi bi-search display-4"></i>
+                    <p class="mt-3">Masukkan kata kunci untuk mulai mencari</p>
+                </div>
+            </div>
+            
+            <div id="search-stats" class="mt-3 small text-muted d-none">
+                Menampilkan <span id="result-count">0</span> hasil
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Tips Pencarian</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li>Pencarian bersifat <strong>client-side</strong></li>
+                        <li>Semua data diambil dari <code>search.json</code></li>
+                        <li>Mencari di judul, excerpt, dan konten</li>
+                        <li>Tidak membutuhkan server backend</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="footer-placeholder"></div>
+
+<script>
+// Load header and footer
+fetch("/includes/header.html").then(r=>r.text()).then(t=>document.getElementById("header-placeholder").innerHTML=t);
+fetch("/includes/footer.html").then(r=>r.text()).then(t=>document.getElementById("footer-placeholder").innerHTML=t);
+
+// Search functionality
+let searchData = [];
+
+// Load search index
+fetch('/search.json')
+    .then(response => response.json())
+    .then(data => {
+        searchData = data;
+        console.log(`Loaded ${data.length} search entries`);
+        
+        // Cek apakah ada parameter query di URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryParam = urlParams.get('query');
+        
+        if (queryParam && queryParam.trim()) {
+            document.getElementById('search-input').value = queryParam;
+            performSearch(queryParam);
+        }
+    })
+    .catch(err => {
+        console.error('Error loading search index:', err);
+        document.getElementById('search-results').innerHTML = 
+            '<div class="alert alert-danger">Error loading search data</div>';
+    });
+
+function performSearch(query) {
+    if (!query.trim()) {
+        document.getElementById('search-results').innerHTML = `
+            <div class="text-center text-muted">
+                <i class="bi bi-search display-4"></i>
+                <p class="mt-3">Masukkan kata kunci untuk mulai mencari</p>
+            </div>`;
+        document.getElementById('search-stats').classList.add('d-none');
+        return;
+    }
+    
+    const terms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+    if (terms.length === 0) {
+        document.getElementById('search-results').innerHTML = `
+            <div class="alert alert-warning">
+                Masukkan minimal 3 karakter untuk pencarian
+            </div>`;
+        document.getElementById('search-stats').classList.add('d-none');
+        return;
+    }
+    
+    const results = searchData.filter(item => {
+        const searchableText = `
+            ${item.title || ''}
+            ${item.excerpt || ''}
+            ${item.content || ''}
+        `.toLowerCase();
+        
+        return terms.every(term => searchableText.includes(term));
+    });
+    
+    displayResults(results, query);
+}
+
+function displayResults(results, query) {
+    const container = document.getElementById('search-results');
+    const stats = document.getElementById('search-stats');
+    const countSpan = document.getElementById('result-count');
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                Tidak ditemukan hasil untuk "<strong>${query}</strong>"
+            </div>`;
+    } else {
+        let html = '';
+        results.forEach(item => {
+            const typeBadge = item.type === 'article' 
+                ? '<span class="badge bg-success me-2">Artikel</span>'
+                : '<span class="badge bg-primary me-2">Halaman</span>';
+            
+            html += `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        ${typeBadge}
+                        <a href="${item.slug}" class="text-decoration-none">
+                            ${highlightText(item.title, query)}
+                        </a>
+                    </h5>
+                    ${item.excerpt ? `<p class="card-text">${highlightText(item.excerpt, query)}</p>` : ''}
+                    <div class="text-muted small">
+                        <a href="${item.slug}" class="btn btn-sm btn-outline-primary">
+                            Baca selengkapnya <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+    
+    countSpan.textContent = results.length;
+    stats.classList.remove('d-none');
+}
+
+function highlightText(text, query) {
+    if (!text || !query) return text;
+    
+    const terms = query.toLowerCase().split(' ');
+    let highlighted = text;
+    
+    terms.forEach(term => {
+        if (term.length > 2) {
+            const regex = new RegExp(`(${term})`, 'gi');
+            highlighted = highlighted.replace(regex, '<mark class="bg-warning p-1">$1</mark>');
+        }
+    });
+    
+    return highlighted;
+}
+
+// Event listeners
+document.getElementById('search-button').addEventListener('click', () => {
+    const query = document.getElementById('search-input').value;
+    performSearch(query);
+    
+    // Update URL tanpa reload page (pushState)
+    const url = new URL(window.location);
+    url.searchParams.set('query', query);
+    window.history.pushState({}, '', url);
+});
+
+document.getElementById('search-input').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+        const query = e.target.value;
+        performSearch(query);
+        
+        // Update URL tanpa reload page
+        const url = new URL(window.location);
+        url.searchParams.set('query', query);
+        window.history.pushState({}, '', url);
+    }
+});
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('query');
+    
+    if (queryParam) {
+        document.getElementById('search-input').value = queryParam;
+        performSearch(queryParam);
+    } else {
+        document.getElementById('search-input').value = '';
+        performSearch('');
+    }
+});
+</script>
+{% endblock %}

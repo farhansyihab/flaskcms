@@ -175,3 +175,25 @@ def includes_files(filename):
     except Exception as e:
         print(f"❌ Error serving include file {filename}: {e}")
         abort(404)
+
+@public_bp.route("/search/")
+def search_page():
+    """Halaman pencarian client-side"""
+    return render_template(
+        "public/search.html",
+        page={
+            "title": "Pencarian - DPW ABI Sumatera Selatan",
+            "seo": {
+                "title": "Pencarian - DPW ABI Sumatera Selatan",
+                "description": "Cari artikel dan halaman di website DPW ABI Sumatera Selatan",
+                "image": DEFAULT_IMAGE,
+                "og_title": "Pencarian - DPW ABI Sumatera Selatan",
+                "og_description": "Cari artikel dan halaman di website DPW ABI Sumatera Selatan",
+                "og_image": DEFAULT_IMAGE,
+                "twitter_card": "summary_large_image",
+                "twitter_title": "Pencarian - DPW ABI Sumatera Selatan",
+                "twitter_description": "Cari artikel dan halaman di website DPW ABI Sumatera Selatan",
+                "twitter_image": DEFAULT_IMAGE
+            }
+        }
+    )        
