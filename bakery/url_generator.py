@@ -153,7 +153,7 @@ class URLGenerator:
         return articles
     
     def generate_all_urls(self):
-        """Generate semua URL yang akan di-bake"""
+        """Generate semua URL yang akan di-bake - DENGAN PAGINATION"""
         urls = []
         
         # 1. Static URLs
@@ -183,6 +183,30 @@ class URLGenerator:
         
         print(f"➕ {len(articles)} article URLs")
         
+        # 4. Pagination URLs (NEW!)
+        articles_per_page = 10
+        total_articles = len(articles)
+        total_pages = (total_articles + articles_per_page - 1) // articles_per_page
+        
+        # Sort articles by date (newest first)
+        sorted_articles = sorted(
+            articles, 
+            key=lambda x: x.get("created_at", ""), 
+            reverse=True
+        )
+        
+        # Simpan untuk digunakan nanti
+        self.sorted_articles = sorted_articles
+        
+        # Generate pagination URLs
+        for page_num in range(1, total_pages + 1):
+            if page_num == 1:
+                # Page 1 sudah ada di /info/
+                continue
+            urls.append(f"/info/page/{page_num}/")
+        
+        print(f"➕ {total_pages - 1} pagination URLs (total {total_pages} pages)")
+        
         # Remove duplicates and sort
         urls = sorted(set(urls))
         print(f"📊 Total unique URLs: {len(urls)}")
@@ -190,13 +214,13 @@ class URLGenerator:
         return urls
     
     def get_data_for_url(self, url):
-        """Ambil data spesifik untuk URL tertentu - FIXED"""
+        """Ambil data spesifik untuk URL tertentu - DENGAN PAGINATION"""
         url = url.rstrip('/')
         
         # Debug info
         print(f"🔍 Getting data for: {url}")
         
-        # Halaman search - selalu render dengan template search.html
+        # Halaman search
         if url == "/search":
             print("✅ Search page requested")
             return {
@@ -209,27 +233,92 @@ class URLGenerator:
                 }
             }
         
-        # Article list page
-        if url == "/info":
-            articles = self.get_published_articles()
+        # Article list dengan pagination
+        if url == "/info" or url.startswith("/info/page/"):
+            if not hasattr(self, 'sorted_articles'):
+                articles = self.get_published_articles()
+                self.sorted_articles = sorted(
+                    articles, 
+                    key=lambda x: x.get("created_at", ""), 
+                    reverse=True
+                )
+            
+            articles_per_page = 10
+            total_articles = len(self.sorted_articles)
+            total_pages = (total_articles + articles_per_page - 1) // articles_per_page
+            
+            # Tentukan halaman saat ini
+            current_page = 1
+            if url.startswith("/info/page/"):
+                try:
+                    current_page = int(url.replace("/info/page/", "").strip("/"))
+                except:
+                    current_page = 1
+            
+            # Validasi halaman
+            if current_page < 1 or current_page > total_pages:
+                print(f"❌ Invalid page number: {current_page}")
+                return None
+            
+            # Hitung start dan end index
+            start_idx = (current_page - 1) * articles_per_page
+            end_idx = start_idx + articles_per_page
+            
+            # Ambil artikel untuk halaman ini
+            page_articles = self.sorted_articles[start_idx:end_idx]
+            
+            # Info pagination
+            pagination_info = {
+                "current_page": current_page,
+                "total_pages": total_pages,
+                "total_articles": total_articles,
+                "has_previous": current_page > 1,
+                "has_next": current_page < total_pages,
+                "previous_page": current_page - 1 if current_page > 1 else None,
+                "next_page": current_page + 1 if current_page < total_pages else None,
+                "page_numbers": self.get_page_numbers(current_page, total_pages)
+            }
+            
+            # SEO untuk setiap halaman
+            if current_page == 1:
+                seo_title = "Info & Berita - DPW ABI Sumatera Selatan"
+                seo_description = "Kumpulan berita dan informasi terkini dari DPW ABI Sumatera Selatan"
+            else:
+                seo_title = f"Info & Berita - Halaman {current_page} - DPW ABI Sumatera Selatan"
+                seo_description = f"Halaman {current_page} dari berita dan informasi DPW ABI Sumatera Selatan"
+            
             return {
-                "articles": articles,
+                "articles": page_articles,
+                "pagination": pagination_info,
                 "page": {
-                    "title": "Berita & Informasi",
-                    "seo": {"title": "Berita ABI SUMSEL", "description": "Informasi terbaru dari DPW ABI Sumatera Selatan"}
+                    "title": f"Info & Berita - Halaman {current_page}",
+                    "seo": {
+                        "title": seo_title,
+                        "description": seo_description,
+                        "image": BakeryConfig.DEFAULT_IMAGE,
+                        "og_title": seo_title,
+                        "og_description": seo_description,
+                        "og_image": BakeryConfig.DEFAULT_IMAGE,
+                        "twitter_card": "summary_large_image",
+                        "twitter_title": seo_title,
+                        "twitter_description": seo_description,
+                        "twitter_image": BakeryConfig.DEFAULT_IMAGE
+                    }
                 }
             }
         
         # Article detail
         if url.startswith("/info/"):
-            slug = url.replace("/info/", "").strip("/")
-            articles = self.get_published_articles()
-            for article in articles:
-                if article.get("slug") == slug:
-                    print(f"✅ Found article: {article.get('title')}")
-                    return {"article": article}
-            print(f"❌ Article not found: {slug}")
-            return None
+            # Cek apakah ini bukan pagination URL
+            if not url.startswith("/info/page/"):
+                slug = url.replace("/info/", "").strip("/")
+                articles = self.get_published_articles()
+                for article in articles:
+                    if article.get("slug") == slug:
+                        print(f"✅ Found article: {article.get('title')}")
+                        return {"article": article}
+                print(f"❌ Article not found: {slug}")
+                return None
         
         # Homepage
         if url == "" or url == "/":
@@ -255,3 +344,17 @@ class URLGenerator:
         
         print(f"❌ Page not found: {slug}")
         return None
+
+    def get_page_numbers(self, current_page, total_pages):
+        """Generate list page numbers untuk pagination UI"""
+        max_pages_to_show = 5
+        half = max_pages_to_show // 2
+        
+        start = max(1, current_page - half)
+        end = min(total_pages, start + max_pages_to_show - 1)
+        
+        # Adjust jika tidak cukup page
+        if end - start + 1 < max_pages_to_show:
+            start = max(1, end - max_pages_to_show + 1)
+        
+        return list(range(start, end + 1))

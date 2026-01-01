@@ -49,6 +49,7 @@ class BakeryConfig:
     SITE_URL = "https://abi-sumsel.my.id"
     DEFAULT_TITLE = "DPW ABI Sumatera Selatan"
     DEFAULT_DESCRIPTION = "Website resmi DPW Ahlulbait Indonesia Sumatera Selatan"
+    DEFAULT_IMAGE = "https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-180x180.png"
     
     @classmethod
     def setup_dirs(cls):

@@ -137,7 +137,7 @@ class HTMLWriter:
             print(f"❌ Error copying include files: {e}")            
     
     def generate_sitemap(self, urls):
-        """Generate sitemap.xml dari semua URL - IMPROVED"""
+        """Generate sitemap.xml dari semua URL - IMPROVED dengan priority berbeda"""
         if not urls:
             print("⚠️  No URLs for sitemap")
             return
@@ -147,10 +147,31 @@ class HTMLWriter:
         
         for url in urls:
             full_url = f"{BakeryConfig.SITE_URL}{url}"
+            
+            # Tentukan priority berdasarkan jenis halaman
+            priority = "0.8"
+            changefreq = "weekly"
+            
+            if url == "/":
+                priority = "1.0"
+                changefreq = "daily"
+            elif url == "/info/":
+                priority = "0.9"
+                changefreq = "daily"
+            elif url.startswith("/info/page/"):
+                priority = "0.7"
+                changefreq = "weekly"
+            elif url.startswith("/info/"):
+                priority = "0.8"
+                changefreq = "monthly"
+            elif url in ["/about/", "/team/", "/contact/"]:
+                priority = "0.8"
+                changefreq = "monthly"
+            
             sitemap_content += f'  <url>\n'
             sitemap_content += f'    <loc>{full_url}</loc>\n'
-            sitemap_content += f'    <changefreq>weekly</changefreq>\n'
-            sitemap_content += f'    <priority>0.8</priority>\n'
+            sitemap_content += f'    <changefreq>{changefreq}</changefreq>\n'
+            sitemap_content += f'    <priority>{priority}</priority>\n'
             sitemap_content += f'  </url>\n'
         
         sitemap_content += '</urlset>'

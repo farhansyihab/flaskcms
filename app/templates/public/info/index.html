@@ -7,11 +7,23 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Beranda</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Info & Berita</li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Info & Berita {% if pagination and pagination.current_page > 1 %}- Halaman {{ pagination.current_page }}{% endif %}
+            </li>
         </ol>
     </nav>
     
     <h1 class="mb-4">Info & Berita ABI Sumsel</h1>
+    
+    {% if pagination %}
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle"></i>
+        Menampilkan <strong>{{ pagination.total_articles }}</strong> artikel
+        {% if pagination.total_pages > 1 %}
+            (Halaman {{ pagination.current_page }} dari {{ pagination.total_pages }})
+        {% endif %}
+    </div>
+    {% endif %}
     
     {% if articles %}
         <div class="row">
@@ -48,6 +60,51 @@
             </div>
             {% endfor %}
         </div>
+        
+        <!-- PAGINATION -->
+        {% if pagination and pagination.total_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <!-- Previous button -->
+                {% if pagination.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="/info/{% if pagination.previous_page > 1 %}page/{{ pagination.previous_page }}/{% endif %}" 
+                       aria-label="Previous">
+                        <span aria-hidden="true">&laquo; Sebelumnya</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo; Sebelumnya</span>
+                </li>
+                {% endif %}
+                
+                <!-- Page numbers -->
+                {% for page_num in pagination.page_numbers %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="/info/{% if page_num > 1 %}page/{{ page_num }}/{% endif %}">
+                        {{ page_num }}
+                    </a>
+                </li>
+                {% endfor %}
+                
+                <!-- Next button -->
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="/info/page/{{ pagination.next_page }}/" 
+                       aria-label="Next">
+                        <span aria-hidden="true">Selanjutnya &raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Selanjutnya &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
     {% else %}
         <div class="text-center py-5">
             <i class="bi bi-newspaper display-1 text-muted"></i>
