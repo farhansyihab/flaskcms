@@ -85,6 +85,7 @@ class FlaskCMSBakery:
         # 3. Copy static files
         print("\n📁 Step 3: Copying static files...")
         self.writer.copy_static_files()
+        self.writer.copy_includes_files()
         
         # 4. Generate SEO files
         print("\n🔍 Step 4: Generating SEO files...")

@@ -57,17 +57,24 @@ class BakeryConfig:
         print(f"  • Current dir: {cls.CURRENT_DIR}")
         print(f"  • Project root: {cls.PROJECT_ROOT}")
         
-        # Create output directory
-        cls.OUTPUT_DIR.mkdir(exist_ok=True)
-        print(f"  • Output: {cls.OUTPUT_DIR}")
+        # Temukan backup directory
+        possible_backup_dirs = [
+            cls.CURRENT_DIR / "backups",
+            cls.PROJECT_ROOT / "backups",
+            cls.CURRENT_DIR.parent / "backups",
+            Path(".") / "backups",
+        ]
         
-        # Create subdirectories
-        (cls.OUTPUT_DIR / "static").mkdir(exist_ok=True)
-        (cls.OUTPUT_DIR / "info").mkdir(exist_ok=True, parents=True)
+        for backup_dir in possible_backup_dirs:
+            if backup_dir.exists():
+                cls.BACKUP_DIR = backup_dir
+                cls.LATEST_BACKUP = backup_dir / "latest_backup.txt"
+                cls.SPECIFIC_BACKUP = backup_dir / "firestore_backup_20260101_061004.json"
+                print(f"  • Backup dir: {cls.BACKUP_DIR}")
+                break
         
-        # Check if templates exist in app/templates or templates/
-        if not cls.TEMPLATE_DIR.exists():
-            print(f"⚠️  Template directory not found: {cls.TEMPLATE_DIR}")
+        if not cls.BACKUP_DIR:
+            print(f"⚠️  Backup directory not found")
             
             # Check app/templates
             app_templates = cls.PROJECT_ROOT / "app" / "templates"

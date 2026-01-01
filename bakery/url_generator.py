@@ -21,35 +21,64 @@ class URLGenerator:
     def get_latest_backup(self):
         """Ambil file backup terbaru - FIXED PARSING"""
         try:
-            with open(BakeryConfig.LATEST_BACKUP, 'r', encoding='utf-8') as f:
-                content = f.read()
-                
-            # Parse file path from content
-            lines = content.strip().split('\n')
-            for line in lines:
-                if line.startswith('File:'):
-                    # Extract file path
-                    file_path = line.replace('File:', '').strip()
-                    backup_path = Path(file_path)
-                    if backup_path.exists():
-                        print(f"📂 Found backup file from latest_backup.txt: {backup_path}")
-                        return backup_path
+            # Coba path relatif dari current directory
+            current_dir = Path.cwd()
             
-            # Fallback: look for any JSON file in backups directory
-            backup_dir = BakeryConfig.PROJECT_ROOT / "backups"
-            if backup_dir.exists():
-                backups = list(backup_dir.glob("*.json"))
-                if backups:
-                    # Get the most recent backup
-                    latest = max(backups, key=lambda x: x.stat().st_mtime)
-                    print(f"📂 Using latest backup file: {latest}")
-                    return latest
+            # Cek beberapa lokasi kemungkinan backup
+            possible_backup_locations = [
+                current_dir / "backups" / "latest_backup.txt",
+                current_dir.parent / "backups" / "latest_backup.txt",
+                BakeryConfig.CURRENT_DIR / "backups" / "latest_backup.txt",
+                BakeryConfig.PROJECT_ROOT / "backups" / "latest_backup.txt",
+            ]
+            
+            for backup_path in possible_backup_locations:
+                if backup_path.exists():
+                    print(f"📂 Found latest_backup.txt: {backup_path}")
+                    # Baca isi file
+                    with open(backup_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
                     
+                    # Parse file path dari content
+                    lines = content.strip().split('\n')
+                    for line in lines:
+                        if line.startswith('File:'):
+                            file_path = line.replace('File:', '').strip()
+                            # Coba beberapa lokasi untuk file JSON
+                            possible_json_locations = [
+                                Path(file_path),
+                                backup_path.parent / Path(file_path).name,
+                                current_dir / "backups" / Path(file_path).name,
+                                current_dir.parent / "backups" / Path(file_path).name,
+                            ]
+                            
+                            for json_path in possible_json_locations:
+                                if json_path.exists():
+                                    print(f"📂 Found backup file: {json_path}")
+                                    return json_path
+            
+            # Fallback: cari file JSON di direktori backups
+            possible_backup_dirs = [
+                current_dir / "backups",
+                current_dir.parent / "backups",
+                BakeryConfig.CURRENT_DIR / "backups",
+                BakeryConfig.PROJECT_ROOT / "backups",
+            ]
+            
+            for backup_dir in possible_backup_dirs:
+                if backup_dir.exists():
+                    backups = list(backup_dir.glob("*.json"))
+                    if backups:
+                        # Dapatkan backup terbaru
+                        latest = max(backups, key=lambda x: x.stat().st_mtime)
+                        print(f"📂 Using latest JSON backup: {latest}")
+                        return latest
+                        
         except Exception as e:
-            print(f"⚠️  Error reading latest_backup.txt: {e}")
+            print(f"⚠️  Error reading backup files: {e}")
         
-        # Fallback to specific file if exists
-        specific_backup = BakeryConfig.PROJECT_ROOT / "backups" / "firestore_backup_20260101_061004.json"
+        # Fallback ke file spesifik
+        specific_backup = Path("backups/firestore_backup_20260101_061004.json")
         if specific_backup.exists():
             print(f"📂 Using specific backup file: {specific_backup}")
             return specific_backup

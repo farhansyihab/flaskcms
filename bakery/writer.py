@@ -100,6 +100,40 @@ class HTMLWriter:
             print(f"📁 Copied {file_count} static files to {static_dest}")
         except Exception as e:
             print(f"❌ Error copying static files: {e}")
+
+    def copy_includes_files(self):
+        """Copy include files ke output directory"""
+        # Cari folder includes
+        possible_include_dirs = [
+            BakeryConfig.TEMPLATE_DIR / "public" / "includes",
+            BakeryConfig.PROJECT_ROOT / "app" / "templates" / "public" / "includes",
+            Path("app/templates/public/includes"),
+            Path("templates/public/includes"),
+        ]
+        
+        include_src = None
+        for dir_path in possible_include_dirs:
+            if dir_path.exists() and dir_path.is_dir():
+                include_src = dir_path
+                break
+        
+        if not include_src:
+            print("⚠️  Includes directory not found")
+            return
+        
+        include_dest = self.output_dir / "includes"
+        
+        # Hapus yang lama
+        if include_dest.exists():
+            shutil.rmtree(include_dest)
+        
+        # Copy yang baru
+        try:
+            shutil.copytree(include_src, include_dest)
+            file_count = sum(1 for _ in include_dest.rglob("*") if _.is_file())
+            print(f"📄 Copied {file_count} include files to {include_dest}")
+        except Exception as e:
+            print(f"❌ Error copying include files: {e}")            
     
     def generate_sitemap(self, urls):
         """Generate sitemap.xml dari semua URL - IMPROVED"""
