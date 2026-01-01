@@ -91,8 +91,14 @@ class FlaskCMSBakery:
         print("\n🔍 Step 4: Generating SEO files...")
         self.writer.generate_sitemap(urls)
         self.writer.generate_robots_txt()
+
+        # 5. Generate search index
+        print("\n🔍 Step 5: Generating search index...")
+        articles = self.url_gen.get_published_articles()
+        pages = self.url_gen.get_published_pages()
+        self.writer.generate_search_index(articles, pages)        
         
-        # 5. Summary
+        # 6. Summary
         elapsed = time.time() - start_time
         print("\n" + "=" * 60)
         print("✅ BAKERY PROCESS COMPLETED!")

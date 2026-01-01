@@ -35,8 +35,12 @@ class TemplateRenderer:
         print(f"🎨 Rendering URL: {url}")
         
         with self.app.test_request_context(path=url):
-            # Tentukan template berdasarkan context_data, bukan hanya URL
-            if "article" in context_data:
+            # Tentukan template berdasarkan URL atau context_data
+            if url == "/search/":
+                # Halaman search khusus
+                template = "public/search.html"
+                print(f"   Type: Search Page")
+            elif "article" in context_data:
                 # Detail artikel
                 template = "public/info/article.html"
                 print(f"   Type: Article Detail - {context_data['article'].get('title', 'Untitled')}")
@@ -75,6 +79,11 @@ class TemplateRenderer:
                         # Coba fallback ke page.html untuk artikel
                         html = render_template("public/page.html", **context_data)
                         print(f"   ✅ Fallback to page.html successful")
+                        return html
+                    elif template == "public/search.html":
+                        # Coba fallback ke page.html untuk search
+                        html = render_template("public/page.html", **context_data)
+                        print(f"   ✅ Fallback to page.html for search successful")
                         return html
                 except Exception as e2:
                     print(f"   ❌ Fallback also failed: {e2}")

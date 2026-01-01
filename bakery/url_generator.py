@@ -110,15 +110,18 @@ class URLGenerator:
                         "id": doc_id,
                         "slug": data.get("slug", "").strip(),
                         "title": data.get("title", "Untitled"),
-                        "content": data.get("content_html", ""),
+                        "content_html": data.get("content_html", ""),  # Perhatikan field ini
+                        "content": data.get("content_html", ""),  # Fallback
                         "seo": data.get("seo", {}),
                         "meta_description": data.get("meta_description", ""),
                         "author": data.get("author", ""),
                         "updated_at": doc.get("update_time", ""),
                     }
+                    # DEBUG: Print page info
+                    print(f"📄 Page found: '{page['title']}' (slug: '{page['slug']}', has content: {bool(page['content_html'])})")
                     pages.append(page)
         
-        print(f"📄 Found {len(pages)} published pages")
+        print(f"📄 Total published pages: {len(pages)}")
         return pages
     
     def get_published_articles(self):
@@ -192,6 +195,19 @@ class URLGenerator:
         
         # Debug info
         print(f"🔍 Getting data for: {url}")
+        
+        # Halaman search - selalu render dengan template search.html
+        if url == "/search":
+            print("✅ Search page requested")
+            return {
+                "page": {
+                    "title": "Pencarian - DPW ABI Sumatera Selatan",
+                    "seo": {
+                        "title": "Pencarian - DPW ABI Sumatera Selatan",
+                        "description": "Cari artikel dan halaman di website DPW ABI Sumatera Selatan"
+                    }
+                }
+            }
         
         # Article list page
         if url == "/info":

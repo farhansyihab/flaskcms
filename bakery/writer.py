@@ -4,6 +4,7 @@ ENHANCED: Better error handling and validation
 """
 import shutil
 import time
+import json
 from pathlib import Path
 from bakery.config import BakeryConfig
 
@@ -178,3 +179,42 @@ Sitemap: {BakeryConfig.SITE_URL}/sitemap.xml
             f.write(robots_content)
         
         print("🤖 Generated robots.txt")
+
+    def generate_search_index(self, articles, pages):
+        """Generate JSON index untuk client-side search - FIXED"""
+        search_data = []
+        
+        # Tambahkan artikel
+        for article in articles:
+            search_data.append({
+                "type": "article",
+                "title": article.get("title", ""),
+                "slug": f"/info/{article.get('slug', '')}/",
+                "excerpt": article.get("excerpt", "")[:150],
+                "content": article.get("content", "")[:500] if article.get("content") else "",
+                "date": article.get("created_at", "")
+            })
+        
+        # Tambahkan halaman statis (kecuali homepage dengan slug "/")
+        for page in pages:
+            slug = page.get("slug", "").strip()
+            if slug and slug != "/":
+                # Skip homepage yang sudah ditangani terpisah
+                if slug == "/":
+                    continue
+                    
+                search_data.append({
+                    "type": "page",
+                    "title": page.get("title", ""),
+                    "slug": f"/{slug.strip('/')}/",
+                    "excerpt": page.get("seo", {}).get("description", "")[:150],
+                    "content": page.get("content_html", "")[:500] if page.get("content_html") else "",
+                    "date": page.get("updated_at", "")
+                })
+        
+        # Tulis ke file
+        search_path = self.output_dir / "search.json"
+        with open(search_path, 'w', encoding='utf-8') as f:
+            json.dump(search_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"🔍 Generated search.json with {len(search_data)} entries")      

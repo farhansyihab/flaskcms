@@ -34,7 +34,7 @@ class BakeryConfig:
         "/about/",               # About page
         "/contact/",             # Contact page
         "/team/",                # Team page
-        "/search/",              # Search page
+        "/search/",              # Search page ← SUDAH ADA
         "/jadwal-acara/",        # Schedule page
     ]
     
