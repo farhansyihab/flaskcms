@@ -202,3 +202,13 @@ class BakeryConfig:
         
         cls.TEMPLATE_DIR = templates_dir
         print(f"  ✅ Created test templates in: {cls.TEMPLATE_DIR}")
+
+    @staticmethod
+    def get_all_static_files():
+        """Return list of semua file statis yang akan dicopy"""
+        return [
+            "feed.xml",      # RSS feed
+            "sitemap.xml",   # Sitemap
+            "robots.txt",    # Robots
+            "search.json"    # Search index
+        ]

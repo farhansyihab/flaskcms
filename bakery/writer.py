@@ -238,4 +238,102 @@ Sitemap: {BakeryConfig.SITE_URL}/sitemap.xml
         with open(search_path, 'w', encoding='utf-8') as f:
             json.dump(search_data, f, ensure_ascii=False, indent=2)
         
-        print(f"🔍 Generated search.json with {len(search_data)} entries")      
+        print(f"🔍 Generated search.json with {len(search_data)} entries")
+
+    def generate_rss_feed(self, articles):
+        """Generate RSS feed XML dari artikel terbaru - SIMPLE"""
+        if not articles:
+            print("⚠️  No articles for RSS feed")
+            return
+        
+        # Sort articles by date (newest first)
+        sorted_articles = sorted(
+            articles,
+            key=lambda x: x.get("created_at", ""),
+            reverse=True
+        )
+        
+        # Ambil 20 artikel terbaru (bisa disesuaikan)
+        latest_articles = sorted_articles[:20]
+        
+        # Current time untuk timestamp
+        from datetime import datetime
+        current_time = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+        
+        # Build RSS content
+        rss_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>DPW ABI Sumatera Selatan - Berita Terkini</title>
+    <link>{BakeryConfig.SITE_URL}</link>
+    <atom:link href="{BakeryConfig.SITE_URL}/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Website resmi DPW Ahlulbait Indonesia Sumatera Selatan - Kumpulan berita dan informasi terkini</description>
+    <language>id</language>
+    <lastBuildDate>{current_time}</lastBuildDate>
+    <generator>FlaskCMS Bakery v1.0</generator>
+    
+'''
+        
+        # Add each article as item
+        for article in latest_articles:
+            # Prepare article data
+            title = article.get("title", "Untitled")
+            slug = article.get("slug", "")
+            description = article.get("excerpt", article.get("meta_description", ""))
+            content = article.get("content", "")
+            author = article.get("author", "Admin")
+            pub_date = article.get("created_at", "")
+            
+            # Format date for RSS
+            try:
+                if pub_date:
+                    # Parse ISO format to RFC 822 format
+                    from datetime import datetime
+                    if "T" in pub_date:
+                        dt = datetime.fromisoformat(pub_date.replace("Z", "+00:00"))
+                        pub_date_formatted = dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                    else:
+                        pub_date_formatted = pub_date
+                else:
+                    pub_date_formatted = current_time
+            except:
+                pub_date_formatted = current_time
+            
+            # Build item
+            rss_content += f'''    <item>
+        <title>{self.escape_xml(title)}</title>
+        <link>{BakeryConfig.SITE_URL}/info/{slug}/</link>
+        <guid isPermaLink="true">{BakeryConfig.SITE_URL}/info/{slug}/</guid>
+        <description>{self.escape_xml(description[:200])}</description>
+        <pubDate>{pub_date_formatted}</pubDate>
+        <author>{self.escape_xml(author)}</author>
+    </item>
+'''
+        
+        # Close RSS
+        rss_content += '</channel>\n</rss>'
+        
+        # Write to file
+        rss_path = self.output_dir / "feed.xml"
+        with open(rss_path, 'w', encoding='utf-8') as f:
+            f.write(rss_content)
+        
+        print(f"📰 Generated RSS feed with {len(latest_articles)} articles")
+    
+    def escape_xml(self, text):
+        """Escape XML special characters - SIMPLE"""
+        if not text:
+            return ""
+        
+        escapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&apos;'
+        }
+        
+        for char, escape in escapes.items():
+            text = text.replace(char, escape)
+        
+        return text
