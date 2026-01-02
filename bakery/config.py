@@ -49,6 +49,7 @@ class BakeryConfig:
     SITE_URL = "https://abi-sumsel.my.id"
     DEFAULT_TITLE = "DPW ABI Sumatera Selatan"
     DEFAULT_DESCRIPTION = "Website resmi DPW Ahlulbait Indonesia Sumatera Selatan"
+    DEFAULT_IMAGE = "https://farhansyihab.github.io/abi-firebase/public/img/icons/apple-touch-icon-180x180.png"
     
     @classmethod
     def setup_dirs(cls):
@@ -201,3 +202,13 @@ class BakeryConfig:
         
         cls.TEMPLATE_DIR = templates_dir
         print(f"  ✅ Created test templates in: {cls.TEMPLATE_DIR}")
+
+    @staticmethod
+    def get_all_static_files():
+        """Return list of semua file statis yang akan dicopy"""
+        return [
+            "feed.xml",      # RSS feed
+            "sitemap.xml",   # Sitemap
+            "robots.txt",    # Robots
+            "search.json"    # Search index
+        ]

@@ -96,9 +96,16 @@ class FlaskCMSBakery:
         print("\n🔍 Step 5: Generating search index...")
         articles = self.url_gen.get_published_articles()
         pages = self.url_gen.get_published_pages()
-        self.writer.generate_search_index(articles, pages)        
+        self.writer.generate_search_index(articles, pages)  
+
+        # 6. Generate RSS feed
+        print("\n📰 Step 6: Generating RSS feed...")
+        if articles:
+            self.writer.generate_rss_feed(articles)
+        else:
+            print("⚠️  No articles found for RSS feed")      
         
-        # 6. Summary
+        # 7. Summary
         elapsed = time.time() - start_time
         print("\n" + "=" * 60)
         print("✅ BAKERY PROCESS COMPLETED!")
