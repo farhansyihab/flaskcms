@@ -202,17 +202,36 @@ Sitemap: {BakeryConfig.SITE_URL}/sitemap.xml
         print("🤖 Generated robots.txt")
 
     def generate_search_index(self, articles, pages):
-        """Generate JSON index untuk client-side search - FIXED"""
+        """Generate JSON index untuk client-side search - FIXED HTML TAGS"""
         search_data = []
+        
+        # Helper function untuk menghapus HTML tags
+        def strip_html_tags(text):
+            """Hapus semua tag HTML dari teks"""
+            if not text:
+                return ""
+            
+            import re
+            # Hapus tag HTML
+            clean = re.sub(r'<[^>]+>', ' ', text)
+            # Ganti multiple spaces dengan single space
+            clean = re.sub(r'\s+', ' ', clean)
+            # Escape karakter khusus JSON
+            clean = clean.strip()
+            return clean
         
         # Tambahkan artikel
         for article in articles:
+            # Hapus HTML tags dari excerpt dan content
+            clean_excerpt = strip_html_tags(article.get("excerpt", ""))
+            clean_content = strip_html_tags(article.get("content", ""))
+            
             search_data.append({
                 "type": "article",
                 "title": article.get("title", ""),
                 "slug": f"/info/{article.get('slug', '')}/",
-                "excerpt": article.get("excerpt", "")[:150],
-                "content": article.get("content", "")[:500] if article.get("content") else "",
+                "excerpt": clean_excerpt[:500],  # Potong setelah dibersihkan
+                "content": clean_content[:1500],  # Potong setelah dibersihkan
                 "date": article.get("created_at", "")
             })
         
@@ -223,13 +242,17 @@ Sitemap: {BakeryConfig.SITE_URL}/sitemap.xml
                 # Skip homepage yang sudah ditangani terpisah
                 if slug == "/":
                     continue
-                    
+                
+                # Hapus HTML tags dari content
+                clean_content = strip_html_tags(page.get("content_html", ""))
+                clean_excerpt = page.get("seo", {}).get("description", "")
+                
                 search_data.append({
                     "type": "page",
                     "title": page.get("title", ""),
                     "slug": f"/{slug.strip('/')}/",
-                    "excerpt": page.get("seo", {}).get("description", "")[:150],
-                    "content": page.get("content_html", "")[:500] if page.get("content_html") else "",
+                    "excerpt": clean_excerpt[:150],
+                    "content": clean_content[:500],  # Potong setelah dibersihkan
                     "date": page.get("updated_at", "")
                 })
         
