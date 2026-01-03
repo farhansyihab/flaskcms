@@ -6,7 +6,4 @@ public_bp = Blueprint(
     template_folder="templates"
 )
 
-from .routes.home import *
-from .routes.article import *
-from .routes.search import *
-from .routes.includes import *
+from .routes import *
