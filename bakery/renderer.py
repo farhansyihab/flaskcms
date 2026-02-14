@@ -18,7 +18,7 @@ class TemplateRenderer:
         
         # Konfigurasi khusus bakery
         app.config.update({
-            "SERVER_NAME": "localhost",
+            "SERVER_NAME": "abi-sumsel.my.id",  # Gunakan domain asli
             "APPLICATION_ROOT": "/",
             "PREFERRED_URL_SCHEME": "https",
             "BAKERY_MODE": True
@@ -66,6 +66,7 @@ class TemplateRenderer:
             from flask import render_template
             try:
                 html = render_template(template, **context_data)
+                html = self.clean_head_spaces(html)
                 print(f"   ✅ Successfully rendered")
                 return html
             except Exception as e:
@@ -78,6 +79,7 @@ class TemplateRenderer:
                     if template == "public/info/article.html":
                         # Coba fallback ke page.html untuk artikel
                         html = render_template("public/page.html", **context_data)
+                        html = self.clean_head_spaces(html)
                         print(f"   ✅ Fallback to page.html successful")
                         return html
                     elif template == "public/search.html":
@@ -107,3 +109,39 @@ class TemplateRenderer:
         <p>Error during template rendering: {e}</p>
     </body>
     </html>"""
+                
+    def clean_head_spaces(self, html):
+        """Bersihkan spasi berlebih di dalam tag head"""
+        if not html:
+            return html
+        
+        import re
+        
+        # Pattern untuk mencari konten di dalam <head>...</head>
+        head_pattern = re.compile(r'(<head[^>]*>)(.*?)(</head>)', re.DOTALL | re.IGNORECASE)
+        
+        def clean_head(match):
+            open_tag = match.group(1)
+            head_content = match.group(2)
+            close_tag = match.group(3)
+            
+            # Hapus semua newline dan spasi berlebih di awal dan akhir baris
+            lines = head_content.split('\n\n')
+            cleaned_lines = []
+            
+            for line in lines:
+                # Hapus spasi di awal dan akhir baris
+                line = line.strip()
+                # Jika baris tidak kosong, tambahkan
+                if line:
+                    cleaned_lines.append(line)
+            
+            # Gabungkan dengan spasi tunggal
+            cleaned_content = ' '.join(cleaned_lines)
+            
+            # Hapus spasi di sekitar tag
+            cleaned_content = re.sub(r'>\s+<', '>\n<', cleaned_content)
+            
+            return f"{open_tag}{cleaned_content}{close_tag}"
+        
+        return head_pattern.sub(clean_head, html)            

@@ -26,7 +26,7 @@ def callback():
         # List email yang dianggap admin
         ADMIN_EMAILS = [
             "agiptek@gmail.com",
-            "farhan@example.com",
+            "farhanchehaab@gmail.com",
             "admin@abisumsel.org"
         ]
         

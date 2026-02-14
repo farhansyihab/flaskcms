@@ -214,7 +214,7 @@ class URLGenerator:
         return urls
     
     def get_data_for_url(self, url):
-        """Ambil data spesifik untuk URL tertentu - DENGAN PAGINATION"""
+        """Ambil data spesifik untuk URL tertentu - DENGAN CLEAN DESCRIPTION"""
         url = url.rstrip('/')
         
         # Debug info
@@ -309,13 +309,19 @@ class URLGenerator:
         
         # Article detail
         if url.startswith("/info/"):
-            # Cek apakah ini bukan pagination URL
             if not url.startswith("/info/page/"):
                 slug = url.replace("/info/", "").strip("/")
                 articles = self.get_published_articles()
                 for article in articles:
                     if article.get("slug") == slug:
                         print(f"✅ Found article: {article.get('title')}")
+                        
+                        # **BERSIHKAN DESKRIPSI**
+                        if article.get("excerpt"):
+                            article["excerpt"] = self.clean_text(article["excerpt"], 300)
+                        if article.get("meta_description"):
+                            article["meta_description"] = self.clean_text(article["meta_description"], 160)
+                        
                         return {"article": article}
                 print(f"❌ Article not found: {slug}")
                 return None
@@ -344,6 +350,27 @@ class URLGenerator:
         
         print(f"❌ Page not found: {slug}")
         return None
+    
+    # Tambahkan method ini di dalam class URLGenerator
+
+    def clean_text(self, text, max_length=None):
+        """Bersihkan teks dari spasi berlebih dan newlines"""
+        if not text:
+            return ""
+        
+        import re
+        
+        # Ganti multiple newlines dan spasi dengan single space
+        cleaned = re.sub(r'\s+', ' ', text)
+        
+        # Trim
+        cleaned = cleaned.strip()
+        
+        # Potong jika diperlukan
+        if max_length and len(cleaned) > max_length:
+            cleaned = cleaned[:max_length].rsplit(' ', 1)[0] + '...'
+        
+        return cleaned
 
     def get_page_numbers(self, current_page, total_pages):
         """Generate list page numbers untuk pagination UI"""
